@@ -1,0 +1,54 @@
+/* 玻璃角色（GlassMaterial.kt 实值）+ 内容卡（ContentSurface）+ 降级链 */
+.glass-nav, .glass-control, .glass-modal, .glass-content, .glass-interactive {
+  position: relative;
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.glass-nav { background: var(--glass-nav); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: var(--dock-shadow), inset 0 1px 0 var(--glass-highlight); }
+.glass-control { background: var(--glass-control); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); box-shadow: inset 0 1px 0 var(--glass-highlight); }
+.glass-modal { background: var(--glass-modal); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border-radius: var(--radius-dialog); box-shadow: 0 8px 24px rgba(0,0,0,.24), inset 0 1px 0 var(--glass-highlight); }
+.glass-interactive { background: var(--glass-interactive); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.glass-content {
+  background: var(--glass-content);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-card);
+  box-shadow: inset 0 1px 0 var(--card-topline);
+  padding: var(--card-pad);
+}
+.edge-ring::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: linear-gradient(180deg, var(--edge-top), var(--edge-bottom));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events: none;
+}
+.is-scrolling .glass-content { -webkit-backdrop-filter: none; backdrop-filter: none; }
+:root[data-glass="solid"] .glass-nav,
+:root[data-glass="solid"] .glass-control,
+:root[data-glass="solid"] .glass-modal,
+:root[data-glass="solid"] .glass-content,
+:root[data-glass="solid"] .glass-interactive {
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  background: var(--solid);
+}
+:root[data-glass="solid"] .glass-nav { box-shadow: var(--dock-shadow); }
+@media (prefers-reduced-transparency: reduce) {
+  .glass-nav, .glass-control, .glass-modal, .glass-content, .glass-interactive {
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+    background: var(--solid) !important;
+  }
+}
+.lens {
+  position: absolute; border-radius: 999px; overflow: hidden;
+  background: var(--glass-interactive);
+  box-shadow: 0 4px 8px rgba(0,0,0,.22), 0 -10px 25px inset rgba(0,0,0,.12);
+  cursor: grab; touch-action: none; will-change: transform;
+}
+.lens:active { cursor: grabbing; }
+.lens .lit-glow {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(circle at var(--lx, 50%) var(--ly, 50%), rgba(255,255,255,.9) 0%, rgba(255,255,255,.25) 40%, transparent 70%);
+  mix-blend-mode: soft-light; opacity: 0; transition: opacity .25s;
+}

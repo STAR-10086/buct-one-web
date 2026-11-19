@@ -1,0 +1,85 @@
+---
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/glass.css';
+import '../styles/capsules.css';
+import Dock from '../components/Dock.astro';
+import Footer from '../components/Footer.astro';
+interface Props { title: string; description?: string; }
+const { title, description = 'BUCT One · 北化一站 —— 北化人的原生液态玻璃校园工作台。本地优先，零第三方上报。' } = Astro.props;
+const site = Astro.site?.origin ?? 'https://www.buctone.cc.cd';
+const canonical = new URL(Astro.url.pathname, site).href;
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#F0F2F4" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0F1218" media="(prefers-color-scheme: dark)" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:site_name" content="BUCT One · 北化一站" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <script is:inline>
+    (function () {
+      try {
+        var m = localStorage.getItem('buctone.theme');
+        var dark = m === 'dark' || ((m === null || m === 'auto') && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        var g = localStorage.getItem('buctone.glass');
+        document.documentElement.dataset.glassChoice = (g === 'full' || g === 'blur' || g === 'solid') ? g : 'auto';
+      } catch (e) { document.documentElement.dataset.theme = 'light'; }
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <Dock />
+  <main id="main">
+    <slot />
+  </main>
+  <Footer />
+  <div data-toast-host></div>
+  <script>
+    import { initThemeControls, cycleGlass, readGlass } from '../lib/theme';
+    import { initGlass, initScrollPause } from '../lib/liquid-glass';
+    initThemeControls();
+    initGlass();
+    initScrollPause();
+    const GLASS_LABEL: Record<string, string> = { auto: '自动', full: '完整折射', blur: '毛玻璃', solid: '纯色' };
+    document.querySelectorAll<HTMLButtonElement>('[data-glass-toggle]').forEach((btn) => {
+      const label = () => { btn.textContent = '玻璃：' + (GLASS_LABEL[readGlass()] ?? '自动'); };
+      label();
+      btn.addEventListener('click', () => { cycleGlass(); location.reload(); });
+    });
+  </script>
+<script is:inline>
+  (function () {
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    addEventListener('pageshow', function (e) { if (e.persisted) document.documentElement.classList.remove('page-leaving'); });
+    if (reduce) return;
+    document.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+      if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+      var href = a.getAttribute('href');
+      if (!href || href.charAt(0) === '#' || /^(mailto:|tel:|javascript:)/i.test(href)) return;
+      var url; try { url = new URL(href, location.href); } catch (_) { return; }
+      if (url.origin !== location.origin) return;
+      if (url.pathname === location.pathname && url.search === location.search) return;
+      e.preventDefault();
+      if (document.documentElement.classList.contains('page-leaving')) return;
+      document.documentElement.classList.add('page-leaving');
+      setTimeout(function () { location.href = url.href; }, 170);
+    });
+  })();
+</script>
+</body>
+</html>

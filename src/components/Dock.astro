@@ -1,0 +1,49 @@
+---
+import Icon from './Icon.astro';
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const items = [
+  { href: '/', label: '首页', icon: 'home' },
+  { href: '/download', label: '下载', icon: 'download' },
+  { href: '/changelog', label: '更新日志', icon: 'clock' },
+  { href: '/about', label: '关于', icon: 'info' },
+];
+const isCurrent = (href: string) => href === '/' ? path === '/' : path.startsWith(href);
+---
+<header class="dock-wrap">
+  <nav class="cap-dock glass-nav edge-ring" aria-label="主导航">
+    <span class="cap-dock-indicator" data-dock-indicator></span>
+    {items.map((it) => (
+      <a class="cap-dock-item" href={it.href} aria-current={isCurrent(it.href) ? 'page' : undefined} data-dock-item>
+        <Icon name={it.icon} /><span>{it.label}</span>
+      </a>
+    ))}
+    <a class="cap-dock-item" href="https://github.com/STAR-10086/buct-one" target="_blank" rel="noopener" data-dock-item>
+      <Icon name="github" /><span>GitHub</span>
+    </a>
+  </nav>
+</header>
+<style>
+  .dock-wrap { position: sticky; top: 16px; z-index: 100; display: flex; justify-content: center; padding: 16px var(--page-pad) 0; }
+  .cap-dock { width: min(680px, 100%); justify-content: space-between; }
+  @media (max-width: 600px) {
+    .cap-dock-item span { display: none; }
+    .cap-dock-item { min-width: 44px; padding: 4px 8px; }
+  }
+</style>
+<script>
+  import { animateSpring } from '../lib/spring-physics';
+  function placeIndicator(animate: boolean) {
+    const nav = document.querySelector<HTMLElement>('.cap-dock');
+    const ind = document.querySelector<HTMLElement>('[data-dock-indicator]');
+    const cur = nav?.querySelector<HTMLElement>('[aria-current="page"]') ?? nav?.querySelector<HTMLElement>('[data-dock-item]');
+    if (!nav || !ind || !cur) return;
+    const left = cur.offsetLeft, width = cur.offsetWidth;
+    ind.style.width = width + 'px';
+    if (animate) {
+      const from = nav.clientWidth / 2 - width / 2;
+      animateSpring(from, left, 'navSettle', (v) => { ind.style.left = v + 'px'; });
+    } else { ind.style.left = left + 'px'; }
+  }
+  placeIndicator(true);
+  addEventListener('resize', () => placeIndicator(false));
+</script>

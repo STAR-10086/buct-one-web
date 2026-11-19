@@ -1,0 +1,28 @@
+---
+import Icon from './Icon.astro';
+interface Props { sha?: string; }
+const { sha = '' } = Astro.props;
+---
+<div class="sha-row cap-field" data-rel="sha-row" hidden={!sha}>
+  <span class="label">SHA256</span>
+  <code class="mono sha-value" data-rel="sha256">{sha || '未提供'}</code>
+  <button class="cap-icondot" type="button" data-copy-sha aria-label="复制 SHA256"><span><Icon name="copy" /></span></button>
+</div>
+<details class="verify">
+  <summary class="label">如何校验安装包？</summary>
+  <div class="verify-body">
+    <p class="label">PowerShell：</p>
+    <code class="mono">Get-FileHash .\buct-one.apk -Algorithm SHA256</code>
+    <p class="label">命令提示符：</p>
+    <code class="mono">certutil -hashfile buct-one.apk SHA256</code>
+    <p class="label">将计算结果与上方 SHA256 比对，一致即未被篡改。</p>
+  </div>
+</details>
+<style>
+  .sha-row { flex-wrap: wrap; margin-top: 12px; }
+  .sha-value { flex: 1; min-width: 0; font-size: 12px; word-break: break-all; color: var(--on-glass); }
+  .verify { margin-top: 10px; }
+  .verify summary { cursor: pointer; color: var(--primary); }
+  .verify-body { display: grid; gap: 6px; padding: 10px 0; }
+  .verify-body code { font-size: 12px; background: var(--glass-control); padding: 6px 10px; border-radius: 10px; color: var(--on-glass); }
+</style>

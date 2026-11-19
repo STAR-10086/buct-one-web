@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import GlassCard from '../components/GlassCard.astro';
+import ReleasePanel from '../components/ReleasePanel.astro';
+---
+<Base title="下载 BUCT One · 北化一站" description="下载 BUCT One  Android 版：官网 R2 直连与 GitHub Release 双源，自动跟随最新版本，提供 SHA256 校验。">
+  <section class="wrap section download-head">
+    <div>
+      <p class="eyebrow">Download</p>
+      <h1>下载 BUCT One</h1>
+      <p class="lead">双源下载，自动跟随最新正式版。版本号、大小、SHA256 与更新说明实时刷新；双源均不可用时回退到构建快照。</p>
+      <ReleasePanel />
+      <div class="cap-field requirements">
+        <span class="label">系统要求</span>
+        <span>Android 7.0+（API 24）</span>
+        <span>包名 com.buct.one</span>
+        <span>推荐 arm64-v8a · 另有 armeabi-v7a / universal</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap section">
+    <div class="section-head"><h2>三步安装</h2></div>
+    <div class="grid grid-3">
+      <GlassCard accent={1} title="1 · 下载 APK"><p>点击上方「下载 APK」或前往 GitHub Release，获取安装包。</p></GlassCard>
+      <GlassCard accent={3} title="2 · 允许安装"><p>首次安装需允许「安装未知应用」权限，按系统提示授权一次即可。</p></GlassCard>
+      <GlassCard accent={5} title="3 · 登录使用"><p>打开 App，用学校统一身份认证登录，课表与作业自动同步。</p></GlassCard>
+    </div>
+  </section>
+
+  <section class="wrap section">
+    <div class="glass-content cap-card faq-mini">
+      <h3>常见问题</h3>
+      <ul>
+        <li><strong>为什么不在应用商店？</strong> 校园工具类应用上架成本高，开源直发便于快速迭代与监督。</li>
+        <li><strong>安全吗？</strong> 学号密码绝不落盘，凭据 Keystore 加密，零第三方上报；可用 SHA256 校验安装包。</li>
+        <li><strong>和学校官方 App 什么关系？</strong> 本项目为学生开源作品，非学校官方应用。</li>
+      </ul>
+      <a href="/about#faq" class="label">更多 FAQ →</a>
+    </div>
+  </section>
+</Base>
+<style>
+  .download-head { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: start; }
+  .download-head > div { display: grid; gap: 16px; }
+  .requirements { flex-wrap: wrap; gap: 12px; color: var(--on-glass-variant); font-size: 14px; }
+  .faq-mini { display: grid; gap: 10px; }
+  .faq-mini ul { padding-left: 20px; display: grid; gap: 8px; }
+  .faq-mini li { font-size: 14px; line-height: 20px; color: var(--on-glass-variant); }
+</style>

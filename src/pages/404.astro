@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="页面不存在 · BUCT One">
+  <section class="wrap section nf">
+    <div>
+      <p class="eyebrow">404</p>
+      <h1>这块玻璃后面没有内容</h1>
+      <p class="lead">你访问的页面不存在或已移动。回首页看看，或直接下载 App。</p>
+      <div class="nf-cta">
+        <a class="btn btn-primary" href="/">回首页</a>
+        <a class="btn btn-secondary" href="/download">去下载</a>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .nf { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: center; min-height: 60vh; }
+  .nf > div { display: grid; gap: 16px; }
+  .nf-cta { display: flex; gap: 12px; }
+</style>

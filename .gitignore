@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+src/data/changelog-cache.md
+*.log
+
+# 旧仓库备份，不纳入版本控制
+.git-backup-*/

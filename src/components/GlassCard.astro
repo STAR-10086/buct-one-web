@@ -1,0 +1,19 @@
+---
+interface Props { accent?: number; title?: string; badge?: string; }
+const { accent = 0, title, badge } = Astro.props;
+---
+<article class="glass-content cap-card feature-card">
+  {accent > 0 && <span class="accent-bar" style={'background: var(--block-' + accent + ')'}></span>}
+  <div class="feature-body">
+    {title && <h4>{title}{badge && <span class="cap-chip soon">{badge}</span>}</h4>}
+    <slot />
+  </div>
+</article>
+<style>
+  .feature-card { display: flex; gap: 12px; overflow: hidden; }
+  .accent-bar { flex: 0 0 4px; align-self: stretch; border-radius: 2px; }
+  .feature-body { flex: 1; min-width: 0; }
+  .feature-body h4 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; color: var(--on-glass); }
+  .feature-body :global(p) { font-size: 14px; line-height: 20px; color: var(--on-glass-variant); }
+  .soon { height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11px; color: var(--warning); background: var(--warning-c); border: 0; }
+</style>

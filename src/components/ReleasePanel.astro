@@ -1,0 +1,58 @@
+---
+import snapshot from '../data/release-snapshot.json';
+import Icon from './Icon.astro';
+import Sha256Row from './Sha256Row.astro';
+const r = snapshot as any;
+const sizeText = r.sizeBytes > 0 ? (r.sizeBytes / 1048576).toFixed(1) + ' MB' : '—';
+const dateText = String(r.publishedAt || '').slice(0, 10);
+---
+<section class="release">
+  <div class="cap-chip version-chip">
+    <strong data-rel="version">{'v' + r.version}</strong>
+    <span data-rel="date">{dateText}</span>
+    <span data-rel="size">{sizeText}</span>
+    <span class="cap-chip badge" data-rel="badge">离线快照</span>
+    <button class="cap-icondot" type="button" data-rel-refresh aria-label="刷新版本信息"><span><Icon name="refresh" /></span></button>
+  </div>
+  <div class="grid grid-2 sources">
+    <article class="glass-content cap-card source-card">
+      <h3>官网直连 <span class="cap-chip soon">推荐</span></h3>
+      <p>Cloudflare R2 全球加速，自动跟随最新正式版。</p>
+      <a class="btn btn-primary btn-lg" data-rel="apk-href" href={r.apkUrl} data-jelly>
+        <Icon name="download" /> 下载 APK
+      </a>
+    </article>
+    <article class="glass-content cap-card source-card">
+      <h3>GitHub Release</h3>
+      <p>原始发布页，含历史版本与完整更新说明。</p>
+      <a class="btn btn-secondary btn-lg" data-rel="gh-href" href={r.githubReleaseUrl} target="_blank" rel="noopener">
+        <Icon name="github" /> 前往 Release
+      </a>
+    </article>
+  </div>
+  <Sha256Row sha={r.sha256} />
+  <div class="glass-content cap-card changelog-preview">
+    <h4>本版更新</h4>
+    <div class="md" data-rel="changelog"><p class="label">加载更新说明中…若长时间无内容，请查看 GitHub Release。</p></div>
+    <a href="/changelog" class="label">查看完整更新日志 →</a>
+  </div>
+</section>
+<style>
+  .release { display: grid; gap: 16px; }
+  .version-chip { height: auto; min-height: 36px; flex-wrap: wrap; padding: 6px 12px; gap: 10px; color: var(--on-glass); }
+  .version-chip strong { font-size: 14px; }
+  .badge { height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11px; background: var(--primary-container); color: var(--primary); border: 0; }
+  .source-card { display: grid; gap: 10px; align-content: start; }
+  .source-card h3 { display: flex; align-items: center; gap: 8px; color: var(--on-glass); }
+  .source-card p { font-size: 14px; color: var(--on-glass-variant); }
+  .changelog-preview { display: grid; gap: 10px; }
+  .md :global(h3), .md :global(h4) { font-size: 16px; margin: 8px 0 4px; color: var(--on-glass); }
+  .md :global(ul) { padding-left: 20px; display: grid; gap: 4px; }
+  .md :global(li), .md :global(p) { font-size: 14px; line-height: 20px; color: var(--on-glass-variant); }
+  .md :global(code) { font-family: var(--font-mono); font-size: 12px; }
+</style>
+<script>
+  import { initRelease } from '../lib/release';
+  import snapshot from '../data/release-snapshot.json';
+  initRelease(snapshot as any);
+</script>

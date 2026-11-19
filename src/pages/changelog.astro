@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import { miniMarkdown } from '../lib/release';
+import { readFileSync, existsSync } from 'node:fs';
+const dataDir = process.cwd() + '/src/data/';
+const cachePath = dataDir + 'changelog-cache.md';
+const fallbackPath = dataDir + 'changelog-fallback.md';
+const raw = readFileSync(existsSync(cachePath) ? cachePath : fallbackPath, 'utf-8');
+const chunks = raw.split(/^## /m).slice(1);
+const versions = chunks.map((chunk) => {
+  const nl = chunk.indexOf('\n');
+  const header = chunk.slice(0, nl).trim();
+  const body = chunk.slice(nl + 1);
+  const m = header.match(/\[([^\]]+)\]\s*(?:-\s*(.*))?/);
+  const name = m ? m[1] : header;
+  const date = m && m[2] ? m[2].trim() : '';
+  return { name, date, html: miniMarkdown(body), unreleased: name.toLowerCase() === 'unreleased' };
+});
+---
+<Base title="更新日志 · BUCT One" description="BUCT One 全量版本更新日志：新增功能、优化与修复。">
+  <section class="wrap section changelog-head">
+    <div>
+      <p class="eyebrow">Changelog</p>
+      <h1>更新日志</h1>
+      <p class="lead">面向用户的实质性功能新增、问题修复与架构演进。数据构建期取自 App 仓库 CHANGELOG，「开发中」条目未发布。</p>
+    </div>
+  </section>
+  <section class="wrap section timeline">
+    {versions.map((v) => (
+      <article class="glass-content cap-card version-card" id={'v' + v.name.replace(/\./g, '-')}>
+        <div class="version-head">
+          <h3>{v.unreleased ? '开发中' : 'v' + v.name}</h3>
+          {v.date && <span class="cap-chip">{v.date}</span>}
+          {v.unreleased && <span class="cap-chip soon">未发布</span>}
+        </div>
+        <div class="md" set:html={v.html} />
+      </article>
+    ))}
+  </section>
+</Base>
+<style>
+  .changelog-head { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: center; }
+  .timeline { display: grid; gap: 16px; }
+  .version-card { display: grid; gap: 10px; }
+  .version-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .version-head h3 { color: var(--on-glass); }
+  .soon { height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11px; color: var(--warning); background: var(--warning-c); border: 0; }
+  .md :global(h3), .md :global(h4) { font-size: 16px; margin: 10px 0 4px; color: var(--on-glass); }
+  .md :global(ul) { padding-left: 20px; display: grid; gap: 4px; }
+  .md :global(li), .md :global(p) { font-size: 14px; line-height: 20px; color: var(--on-glass-variant); }
+  .md :global(code) { font-family: var(--font-mono); font-size: 12px; }
+  .md :global(hr) { border: 0; border-top: 1px solid var(--divider); margin: 12px 0; }
+</style>

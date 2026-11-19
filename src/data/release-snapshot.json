@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "version": "0.2.0",
+  "tag": "v0.2.0",
+  "apkUrl": "https://github.com/STAR-10086/buct-one/releases/download/v0.2.0/buct-one-v0.2.0-arm64-v8a.apk",
+  "sizeBytes": 13803923,
+  "sha256": "6f8ea18063ae5fec1a574d755363b6c1f30c00d4dbabf4363120a727f7ec2a9a",
+  "publishedAt": "2026-11-19T14:24:43Z",
+  "changelogMd": "## BUCT One v0.2.0 首个正式版\n\n> ⚠️ **安装与签名提示**：本版本起正式启用**正式发布签名**，后续所有正式版均可直接覆盖升级。若此前安装了 GitHub Actions 临时签名的 `v0.2.0-beta.1` 或 CI 自测包，请先卸载旧包再安装本版本；`debug` 调试包使用 Debug 签名，同样不可与正式版相互覆盖安装。\n\n### 安装包下载建议\n\n| 安装包 | 适用设备 / 用途 | 文件大小 | SHA-256 |\n| --- | --- | --- | --- |\n| `buct-one-v0.2.0-arm64-v8a.apk` | **推荐**：绝大多数近几年的 64 位 Android 手机 | 13.16 MB (`13,803,923` B) | `6f8ea18063ae5fec1a574d755363b6c1f30c00d4dbabf4363120a727f7ec2a9a` |\n| `buct-one-v0.2.0-armeabi-v7a.apk` | 较老的 32 位 ARM Android 设备 | 13.16 MB (`13,801,082` B) | `936b49088db8f3c9b99d30fd2d15dd96916b51a5097cd50593bc97f57ffa7474` |\n| `buct-one-v0.2.0-universal.apk` | 全架构通用包（不确定设备架构或模拟器使用） | 13.21 MB (`13,854,270` B) | `dc04e0d02ab2e2284b279408b1c4ad98ad1904c5865b3c0cc4809994d08ad47b` |\n| `buct-one-v0.2.0-debug.apk` | 仅开发调试 / 抓日志使用（Debug 签名） | 38.64 MB (`40,518,731` B) | `490140069cc7127b795ff10a8771c36daf383e3a5a10dfaece5a7f410c5f5616` |\n\n### 自 `v0.2.0-beta.1` 以来的更新日志\n\n1. **北化在线（THEOL / MEOL）体验修复与性能优化（`parserVersion: 2 → 3`）**\n   - 修复点击进入在线测验与课程主页时的白屏问题，并新增原生在线测验详情弹窗。\n   - 优化 MEOL 会话复用、加密凭据恢复与课程缓存策略，减少重复登录与冗余网络请求。\n2. **作业附件原生下载与系统应用打开**\n   - 修复点击作业详情附件及 WebView 内附件下载链接时的白屏问题。\n   - 新增带 MEOL 会话的原生流式下载（自动识别中文文件名、校验北化校内域名跳转、大文件上限保护），并直接调用系统应用打开或提供分享 / 另存卡片。\n3. **桌面今日课表小组件优化**\n   - 按当前时间自动隐藏当天已经上完的课程，只保留待上课程。\n4. **工作台真实姓名展示与空闲教室查询**\n   - 工作台顶部问候改用教务系统获取的学生真实姓名。\n   - 新增工作台独立「查空闲教室」入口，并支持时间段切换查询（同时保留课表空白格快捷查教室）。\n5. **界面清理与品牌统一**\n   - 移除「我的」页教务支持与限制按钮，全部品牌文案统一为 **BUCT One**。\n6. **正式发布签名与多架构发版**\n   - 接入正式发布证书签名与 `apksigner` 自动化验签，提供 `arm64-v8a` / `armeabi-v7a` / `universal` / `debug` 四包同步发布。\n\n### 产物与签名校验信息\n\n- **包名**：`com.buct.one`\n- **版本号**：`0.2.0`（`versionCode = 4`）\n- **最低系统要求**：Android 7.0（API 24）\n- **正式签名证书主体**：`C=CN, CN=STAR`\n- **正式签名证书 SHA-256 指纹**：`a20c584d20db5b242626d5ad6c520b0d127f2e9882bdc9ae622c9e5e10ed0937`\n",
+  "githubReleaseUrl": "https://github.com/STAR-10086/buct-one/releases/tag/v0.2.0",
+  "minSdk": 24,
+  "targetSdk": 34,
+  "abi": "arm64-v8a",
+  "fetchedAt": "2026-11-19T22:42:49.009Z",
+  "source": "github"
+}

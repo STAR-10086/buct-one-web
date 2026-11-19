@@ -1,0 +1,77 @@
+/* 胶囊规格（PLAN §5.3，代码实际列） */
+.cap-dock { display: flex; align-items: center; gap: 4px; height: 72px; padding: 8px; border-radius: 999px; }
+@media (max-width: 767px) { .cap-dock { height: 62px; padding: 6px; } }
+.cap-dock-item {
+  position: relative; z-index: 1;
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-width: 48px; min-height: 48px; padding: 4px 12px; border-radius: 999px;
+  color: var(--on-glass-variant); font-size: 12px; line-height: 16px; font-weight: 500;
+  text-decoration: none; border: 0; background: transparent;
+  transition: color var(--dur-nav-label) var(--ease-fast-out-slow-in);
+}
+.cap-dock-item:hover { text-decoration: none; color: var(--on-glass); }
+.cap-dock-item[aria-current="page"] { color: var(--nav-accent); }
+.cap-dock-item svg { width: 20px; height: 20px; }
+.cap-dock-indicator {
+  position: absolute; z-index: 0; top: 50%; left: 0;
+  height: 56px; border-radius: 999px; transform: translateY(-50%);
+  background: rgba(255, 255, 255, .34);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 2px 8px rgba(0,0,0,.10);
+  pointer-events: none;
+}
+:root[data-theme="dark"] .cap-dock-indicator { background: rgba(255, 255, 255, .20); }
+@media (max-width: 767px) { .cap-dock-indicator { height: 48px; } }
+.cap-card { border-radius: var(--radius-card); }
+.cap-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 12px; border-radius: 18px;
+  font-size: 12px; line-height: 16px; font-weight: 500;
+  background: var(--glass-control); border: 1px solid var(--glass-border);
+  color: var(--on-glass-variant);
+}
+.cap-field {
+  display: flex; align-items: center; gap: 8px;
+  min-height: 48px; padding: 8px 16px; border-radius: var(--radius-field);
+  background: var(--glass-control); border: 1px solid var(--glass-border);
+}
+.cap-pill { min-height: 44px; padding: 0 18px; border-radius: 22px; }
+.cap-segment {
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 40px; padding: 0 8px; border-radius: 20px;
+  background: var(--glass-control); border: 1px solid var(--glass-border); position: relative;
+}
+.cap-segment button {
+  position: relative; z-index: 1; border: 0; background: transparent;
+  height: 32px; padding: 0 14px; border-radius: 16px;
+  font-size: 12px; font-weight: 600; color: var(--on-glass-variant);
+}
+.cap-segment button[aria-pressed="true"] { color: var(--nav-accent); }
+.cap-segment-indicator {
+  position: absolute; z-index: 0; top: 4px; left: 4px; height: 32px; border-radius: 16px;
+  background: rgba(255,255,255,.18); box-shadow: inset 0 1px 0 var(--glass-highlight);
+  transition: transform var(--dur-nav-indicator) var(--ease-emphasized), width var(--dur-nav-indicator) var(--ease-emphasized);
+}
+:root[data-theme="dark"] .cap-segment-indicator { background: rgba(255,255,255,.14); }
+.cap-toast {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 16px; border-radius: 19px;
+  background: var(--glass-modal); border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  font-size: 12px; font-weight: 600; color: var(--on-glass);
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+}
+.cap-icondot {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; border-radius: 999px; border: 0;
+  background: transparent; color: var(--on-glass-variant);
+}
+.cap-icondot > span {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 999px;
+  background: var(--glass-control); border: 1px solid var(--glass-border);
+  transition: transform var(--dur-fast) var(--ease-fast-out-slow-in);
+}
+.cap-icondot:hover > span { color: var(--on-glass); }
+.cap-icondot:active > span { transform: scale(.94); }
+.cap-icondot svg { width: 18px; height: 18px; }
+.cap-dialog { border-radius: var(--radius-dialog); }

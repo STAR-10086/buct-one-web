@@ -1,0 +1,93 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import GlassCard from '../components/GlassCard.astro';
+import PhoneShot from '../components/PhoneShot.astro';
+---
+<Base title="BUCT One · 北化一站 — 北化人自己的校园工作台">
+  <section class="wrap hero">
+    <div class="hero-text">
+      <p class="eyebrow">BUCT One · 北京化工大学</p>
+      <h1>北化人自己的<br />校园工作台</h1>
+      <p class="lead">一次原生登录，串起课表、成绩、作业、实践教学与校园卡。本地优先，零第三方上报——你的数据只留在你的手机上。</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="/download" data-jelly><Icon name="download" /> 下载 Android 版</a>
+        <a class="btn btn-ghost btn-lg" href="https://github.com/STAR-10086/buct-one" target="_blank" rel="noopener"><Icon name="github" /> 查看源码</a>
+      </div>
+      <div class="hero-chips">
+        <span class="cap-chip">Android 7.0+</span>
+        <span class="cap-chip">GPL-3.0 开源</span>
+        <span class="cap-chip">零遥测</span>
+        <span class="cap-chip">密码不落盘</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <span class="lens lens-a" data-lens style="width:120px;height:120px;left:8%;top:6%"><span class="lit-glow"></span></span>
+      <span class="lens lens-b" data-lens style="width:180px;height:64px;right:4%;bottom:10%"><span class="lit-glow"></span></span>
+      <PhoneShot id="workbench" label="工作台首屏" />
+    </div>
+  </section>
+
+  <section class="wrap section" id="privacy">
+    <div class="section-head"><h2>你的凭据，只属于你的手机</h2></div>
+    <div class="grid grid-4">
+      <GlassCard accent={1} title="原生统一认证"><p>SM2/AES + 短信二次验证 + Passkey，全原生 Kotlin 实现，无 WebView 登录。</p></GlassCard>
+      <GlassCard accent={3} title="Keystore 加密"><p>凭据由 Android Keystore AES-GCM 独立加密；学号密码绝不写盘，内存用后清零。</p></GlassCard>
+      <GlassCard accent={5} title="校方证书链"><p>全网强制校方证书链校验，CI 静态禁止 trustAllCerts 与任意 HostnameVerifier。</p></GlassCard>
+      <GlassCard accent={8} title="本地优先"><p>分域原子落盘，同步失败绝不清空旧缓存；课表、成绩、作业离线时刻可读。</p></GlassCard>
+    </div>
+  </section>
+
+  <section class="wrap section" id="features">
+    <div class="section-head"><h2>一个 App，装下整个校园</h2><a href="/download" class="label">立即获取 →</a></div>
+    <div class="grid grid-3">
+      <GlassCard accent={1} title="课表与小组件"><p>周/日视图、多学期回看、课前提醒；桌面周课表与今日课表小组件，HyperOS/OriginOS 适配。</p></GlassCard>
+      <GlassCard accent={4} title="成绩 · GPA"><p>分学期成绩、GPA 统计、培养方案与考试倒计时，本科 / 研究生教务一键切换。</p></GlassCard>
+      <GlassCard accent={3} title="北化在线作业"><p>免二次登录拉取待办作业与测验，原生预览要求、下载附件，一键提交。</p></GlassCard>
+      <GlassCard accent={6} title="实践教学"><p>实验排课课表、开放讲座一键抢报、心得与创新学分明细查询。</p></GlassCard>
+      <GlassCard accent={7} title="校园一卡通"><p>独立口令登录，实时查询卡余额、挂失状态与消费流水。</p></GlassCard>
+      <GlassCard accent={8} title="空闲教室 · ICS"><p>空闲教室实时查询，课表一键导出 ICS 日历，支持多账号切换。</p></GlassCard>
+      <GlassCard accent={5} title="2D 自由栅格工作台" badge="即将上线"><p>2×1 / 1×1 / 0.5×0.5 卡片自由混排，长按弹簧拖拽，最多 30 步撤回。</p></GlassCard>
+      <GlassCard accent={2} title="选课与定时抢课" badge="即将上线"><p>可选列表 / 已选退课 / 定时并发抢课，原生工作台直达。</p></GlassCard>
+      <GlassCard accent={9} title="第二课堂五育综测" badge="即将上线"><p>德智体美劳综测总分与分项明细、二课活动与自评窗口状态。</p></GlassCard>
+    </div>
+  </section>
+
+  <section class="wrap section" id="shots">
+    <div class="section-head"><h2>液态玻璃，眼见为实</h2></div>
+    <div class="shots-row">
+      <PhoneShot id="workbench" label="工作台" />
+      <PhoneShot id="timetable" label="课表" />
+      <PhoneShot id="score" label="成绩" />
+      <PhoneShot id="homework" label="作业" />
+      <PhoneShot id="profile" label="我的" />
+    </div>
+  </section>
+
+  <section class="wrap section">
+    <div class="glass-content cap-card opensource">
+      <div>
+        <h2>GPL-3.0 开源，欢迎监督与共建</h2>
+        <p class="lead">代码完全公开，隐私承诺可被逐条验证。整合改造自 zhengfang-apk、beihua-kebiao 等优秀开源工程，完整声明见 NOTICE。</p>
+      </div>
+      <a class="btn btn-secondary btn-lg" href="https://github.com/STAR-10086/buct-one" target="_blank" rel="noopener"><Icon name="github" /> GitHub 仓库</a>
+    </div>
+  </section>
+</Base>
+<style>
+  .hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 32px; align-items: center; padding-top: 48px; padding-bottom: 24px; }
+  .hero-text { display: grid; gap: 16px; }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .hero-visual { position: relative; display: flex; justify-content: center; min-height: 480px; }
+  .lens-a { z-index: 3; }
+  .lens-b { z-index: 3; }
+  .opensource { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between; padding: 28px; }
+  .opensource h2 { margin-bottom: 8px; }
+  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } .hero-visual { min-height: 420px; order: -1; } }
+  @media (max-width: 767px) { .lens { display: none; } }
+  .shots-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; justify-items: center; }
+  .shots-row :global(.phone-frame) { width: min(220px, 100%); }
+  @media (max-width: 1100px) { .shots-row { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px) { .shots-row { display: flex; overflow-x: auto; gap: 16px; padding-bottom: 8px; scroll-snap-type: x mandatory; } .shots-row > :global(figure) { flex: 0 0 auto; scroll-snap-align: center; } }
+</style>
