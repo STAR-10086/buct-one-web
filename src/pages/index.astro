@@ -84,10 +84,16 @@ import PhoneShot from '../components/PhoneShot.astro';
   .lens-b { z-index: 3; }
   .opensource { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between; padding: 28px; }
   .opensource h2 { margin-bottom: 8px; }
-  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } .hero-visual { min-height: 420px; order: -1; } }
+  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; gap: 20px; padding-top: 24px; } .hero-visual { min-height: 0; order: -1; } }
   @media (max-width: 767px) { .lens { display: none; } }
+  @media (max-width: 640px) {
+    .hero-text { gap: 12px; }
+    .hero-chips { gap: 6px; }
+    .hero-chips .cap-chip { height: 30px; padding: 0 10px; font-size: 11px; }
+    .opensource { padding: 20px; gap: 14px; }
+  }
   .shots-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; justify-items: center; }
   .shots-row :global(.phone-frame) { width: min(220px, 100%); }
   @media (max-width: 1100px) { .shots-row { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 700px) { .shots-row { display: flex; overflow-x: auto; gap: 16px; padding-bottom: 8px; scroll-snap-type: x mandatory; } .shots-row > :global(figure) { flex: 0 0 auto; scroll-snap-align: center; } }
+  @media (max-width: 700px) { .shots-row { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 8px; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; } .shots-row::-webkit-scrollbar { display: none; } .shots-row > :global(figure) { flex: 0 0 auto; width: 62vw; max-width: 230px; scroll-snap-align: center; } }
 </style>

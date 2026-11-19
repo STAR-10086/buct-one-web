@@ -74,3 +74,29 @@ small, .label { font-size: 12px; line-height: 16px; font-weight: 500; }
 html.page-leaving #main { animation: buct-page-exit 180ms cubic-bezier(0.4, 0, 1, 1) both; }
 @media (prefers-reduced-motion: reduce) { #main, html.page-leaving #main { animation: none; } }
 
+/* ── 移动端（≤640px）：收紧尺寸、加大触达、防溢出 ── */
+@media (max-width: 640px) {
+  :root { --page-pad: 16px; --section-gap: 16px; --card-pad: 14px; }
+  body { background-attachment: scroll; font-size: 15px; line-height: 23px; }
+  h1 { font-size: 28px; line-height: 38px; }
+  h2 { font-size: 22px; line-height: 30px; }
+  h3 { font-size: 19px; line-height: 26px; }
+  p { font-size: 15px; line-height: 23px; }
+  .section { padding: 28px 0; }
+  .section-head { margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+  .lead { font-size: 15px; line-height: 23px; }
+  .btn { min-height: 46px; padding: 0 16px; }
+  .btn-lg { min-height: 50px; padding: 0 20px; font-size: 15px; border-radius: 25px; }
+  .grid { gap: 12px; }
+  /* 表格与代码块一律横向滚动，绝不撑破视口 */
+  .md-table, .md table { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; font-size: 11px; }
+  .md-table th, .md-table td, .md th, .md td { white-space: nowrap; }
+  pre { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  code { word-break: break-word; }
+  /* 页脚 */
+  .footer { margin-top: 32px; padding: 24px 0 32px; }
+  .footer-inner { gap: 16px; }
+  .footer-links { gap: 12px 16px; }
+}
+
+

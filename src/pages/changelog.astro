@@ -22,10 +22,10 @@ const versions = chunks.map((chunk) => {
     <div>
       <p class="eyebrow">Changelog</p>
       <h1>更新日志</h1>
-      <p class="lead">面向用户的实质性功能新增、问题修复与架构演进。数据构建期取自 App 仓库 CHANGELOG，「开发中」条目未发布。</p>
+      <p class="lead">面向用户的实质性功能新增、问题修复与架构演进。「开发中」条目尚未发布。<span class="cl-badge" data-changelog-badge>构建时快照</span></p>
     </div>
   </section>
-  <section class="wrap section timeline">
+  <section class="wrap section timeline" data-changelog-root>
     {versions.map((v) => (
       <article class="glass-content cap-card version-card" id={'v' + v.name.replace(/\./g, '-')}>
         <div class="version-head">
@@ -38,16 +38,31 @@ const versions = chunks.map((chunk) => {
     ))}
   </section>
 </Base>
-<style>
-  .changelog-head { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: center; }
+<script>
+  import { initChangelog } from '../lib/release';
+  initChangelog();
+</script>
+<style is:global>
+  .changelog-head { display: grid; grid-template-columns: 1fr; gap: 12px; align-items: center; }
+  .cl-badge { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 10px; font-size: 11px; line-height: 16px; font-weight: 600; background: var(--primary-container); color: var(--primary); white-space: nowrap; }
   .timeline { display: grid; gap: 16px; }
   .version-card { display: grid; gap: 10px; }
   .version-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .version-head h3 { color: var(--on-glass); }
   .soon { height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11px; color: var(--warning); background: var(--warning-c); border: 0; }
-  .md :global(h3), .md :global(h4) { font-size: 16px; margin: 10px 0 4px; color: var(--on-glass); }
-  .md :global(ul) { padding-left: 20px; display: grid; gap: 4px; }
-  .md :global(li), .md :global(p) { font-size: 14px; line-height: 20px; color: var(--on-glass-variant); }
-  .md :global(code) { font-family: var(--font-mono); font-size: 12px; }
-  .md :global(hr) { border: 0; border-top: 1px solid var(--divider); margin: 12px 0; }
+  .md h3, .md h4 { font-size: 16px; margin: 10px 0 4px; color: var(--on-glass); }
+  .md ul { padding-left: 20px; display: grid; gap: 4px; }
+  .md ol { padding-left: 20px; display: grid; gap: 4px; }
+  .md li, .md p { font-size: 14px; line-height: 20px; color: var(--on-glass-variant); }
+  .md code { font-family: var(--font-mono); font-size: 12px; word-break: break-word; }
+  .md hr { border: 0; border-top: 1px solid var(--divider); margin: 12px 0; }
+  .md blockquote { border-left: 3px solid var(--brand); padding: 6px 12px; margin: 8px 0; background: var(--glass-control); border-radius: 0 12px 12px 0; font-size: 13px; color: var(--on-glass-variant); }
+  .md table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .md th, .md td { border: 1px solid var(--glass-border); padding: 6px 8px; text-align: left; vertical-align: top; color: var(--on-glass-variant); white-space: nowrap; }
+  .md th { background: var(--glass-control); color: var(--on-glass); font-weight: 600; }
+  @media (max-width: 640px) {
+    .timeline { gap: 12px; }
+    .version-card { padding: 14px; }
+    .md li, .md p { font-size: 13px; line-height: 21px; }
+  }
 </style>

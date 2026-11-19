@@ -190,3 +190,56 @@ export function showToast(msg: string): void {
   host.appendChild(t);
   setTimeout(() => t.remove(), 2400);
 }
+
+/* ── 更新日志：运行时从 R2 拉全量 CHANGELOG.md，失败保留构建期内容 ── */
+const CL_CACHE_KEY = 'buctone.changelog';
+export async function refreshChangelog(): Promise<string | null> {
+  try {
+    const raw = localStorage.getItem(CL_CACHE_KEY);
+    if (raw) { const c = JSON.parse(raw); if (c && typeof c.text === 'string' && Date.now() - c.fetchedAt < TTL) return null; }
+  } catch { /* noop */ }
+  try {
+    const res = await fetchTimeout(DL + '/meta/changelog.md', { cache: 'no-cache' }, 6000);
+    if (!res.ok) return null;
+    const text = await res.text();
+    if (!text.trim() || !/^## /m.test(text)) return null;
+    try { localStorage.setItem(CL_CACHE_KEY, JSON.stringify({ fetchedAt: Date.now(), text })); } catch { /* noop */ }
+    return text;
+  } catch { return null; }
+}
+export interface ChangelogVersion { name: string; date: string; html: string; unreleased: boolean; }
+export function parseChangelog(md: string): ChangelogVersion[] {
+  return md.split(/^## /m).slice(1).map((chunk) => {
+    const nl = chunk.indexOf('\n');
+    const header = (nl === -1 ? chunk : chunk.slice(0, nl)).trim();
+    const body = nl === -1 ? '' : chunk.slice(nl + 1);
+    const m = header.match(/\[([^\]]+)\]\s*(?:-\s*(.*))?/);
+    const name = m ? m[1] : header;
+    return { name, date: m && m[2] ? m[2].trim() : '', html: miniMarkdown(body), unreleased: name.toLowerCase() === 'unreleased' };
+  });
+}
+const escHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export function renderChangelogTimeline(versions: ChangelogVersion[]): string {
+  return versions.map((v) => {
+    const id = 'v' + escHtml(v.name).replace(/\./g, '-');
+    const head = v.unreleased ? '开发中' : 'v' + escHtml(v.name);
+    return '<article class="glass-content cap-card version-card" id="' + id + '">'
+      + '<div class="version-head"><h3>' + head + '</h3>'
+      + (v.date ? '<span class="cap-chip">' + escHtml(v.date) + '</span>' : '')
+      + (v.unreleased ? '<span class="cap-chip soon">未发布</span>' : '')
+      + '</div><div class="md">' + v.html + '</div></article>';
+  }).join('');
+}
+export function initChangelog(): void {
+  const root = document.querySelector<HTMLElement>('[data-changelog-root]');
+  if (!root) return;
+  refreshChangelog().then((text) => {
+    if (!text) return;
+    const versions = parseChangelog(text);
+    if (!versions.length) return;
+    root.innerHTML = renderChangelogTimeline(versions);
+    const badge = document.querySelector<HTMLElement>('[data-changelog-badge]');
+    if (badge) badge.textContent = '已同步最新日志';
+  });
+}
+
