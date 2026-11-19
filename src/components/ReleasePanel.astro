@@ -38,11 +38,12 @@ const dateText = String(r.publishedAt || '').slice(0, 10);
   </div>
 </section>
 <style>
-  .release { display: grid; gap: 16px; }
+  .release { display: grid; gap: 16px; min-width: 0; max-width: 100%; }
   .version-chip { height: auto; min-height: 36px; flex-wrap: wrap; padding: 6px 12px; gap: 10px; color: var(--on-glass); }
   .version-chip strong { font-size: 14px; }
   .badge { height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11px; background: var(--primary-container); color: var(--primary); border: 0; }
-  .source-card { display: grid; gap: 10px; align-content: start; }
+  .source-card { display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .changelog-preview { min-width: 0; }
   .source-card h3 { display: flex; align-items: center; gap: 8px; color: var(--on-glass); }
   .source-card p { font-size: 14px; color: var(--on-glass-variant); }
   .changelog-preview { display: grid; gap: 10px; }
