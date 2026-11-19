@@ -25,7 +25,7 @@ h4 { font-size: 16px; line-height: 24px; font-weight: 600; }
 p { font-size: 16px; line-height: 24px; }
 small, .label { font-size: 12px; line-height: 16px; font-weight: 500; }
 .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.wrap { max-width: 1080px; margin: 0 auto; padding: 0 var(--page-pad); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: var(--page-pad, 20px); padding-right: var(--page-pad, 20px); }
 .section { padding: calc(var(--section-gap) * 2) 0; }
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: var(--section-gap); }
 .eyebrow { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-variant); }
@@ -96,7 +96,7 @@ html.page-leaving #main { animation: buct-page-exit 180ms cubic-bezier(0.4, 0, 1
 
   /* 横向溢出防御：inline-flex 胶囊撑宽是主因，网格子项 min-width:auto 会跟着被撑开 */
   html, body { max-width: 100%; overflow-x: hidden; }
-  .wrap { max-width: 100%; }
+  .wrap { max-width: 100%; padding-left: 16px; padding-right: 16px; }
   .cap-chip, .version-chip, .cap-field { max-width: 100%; }
   .version-chip { display: flex; width: 100%; box-sizing: border-box; }
   .version-chip > * { flex-shrink: 0; }
@@ -104,7 +104,13 @@ html.page-leaving #main { animation: buct-page-exit 180ms cubic-bezier(0.4, 0, 1
   .release, .source-card, .changelog-preview, .md, .glass-content, .cap-card, .download-head > div { min-width: 0; max-width: 100%; }
   .md { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .md-table, .md table { display: block; width: 100%; max-width: 100%; overflow-x: auto; }
-  .md td code, .md th code { white-space: normal; word-break: break-all; }
+  /* 表格内一律不换行：靠容器横向滚动，避免文件名被拆成竖排 */
+  .md td, .md th, .md-table td, .md-table th { white-space: nowrap; }
+  .md td code, .md th code, .md-table td code { white-space: nowrap; word-break: normal; }
+  /* 表格可横向滑动：露出细滚动条，避免用户以为内容被截断 */
+  .md table::-webkit-scrollbar, .md-table::-webkit-scrollbar { height: 6px; }
+  .md table::-webkit-scrollbar-thumb, .md-table::-webkit-scrollbar-thumb { background: var(--outline); border-radius: 3px; }
+  .md table { scrollbar-width: thin; }
   .btn-lg { width: 100%; box-sizing: border-box; }
   .source-card .btn { width: 100%; }
 
