@@ -5,7 +5,7 @@
 > v1.3 变更：页面切换动效已实现（main 内容区 enter 8px/320ms + 同源链接 exit 12px/.985/180ms 拦截，reduced-motion 关，Dock/Footer 不动）；截图按内容重组为首页画廊 5 槽（workbench/timetable/score/homework/profile），下载/日志/关于/404 不再放截图。
 > v1.1 变更：按父代理补充指令，**视觉与动效一律以 buct-one / zhengfang-apk 实际源码为权威**，文档只作参考；已实读两仓库源码并逐条核对，所有「文档与代码差异」在 §0.2 与正文就地标注。功能文案以 README/CHANGELOG 已实现项为准（§4.5）。
 > 目标：把「北化人的原生液态玻璃校园工作台」做成 **App 界面的 Web 延伸** —— 同一套色板、胶囊与玻璃语言，纯静态、单人可维护、部署 Cloudflare Pages。
-> 域名（2026-11-20 用户确认）：`SITE_DOMAIN` = **https://www.buctone.cc.cd**（官网，Pages；apex buctone.cc.cd 301 → www）· `DL_DOMAIN` = **https://dl.buctone.cc.cd**（网页下载，R2 自定义域）· `UPDATE_DOMAIN` = **https://update.buctone.cc.cd**（App 升级 json + APK，与 dl 同桶同对象）· `PAGES_DEV` = buct-one-web.pages.dev（建项目后确定）。正文占位符号均按此解析；面板配置清单见 §8.5。
+> 域名（2026-11-20 用户确认）：`SITE_DOMAIN` = **https://buctone.cc.cd**（官网主域，Pages 绑 apex；www.buctone.cc.cd 301 → 根）· `DL_DOMAIN` = **https://dl.buctone.cc.cd**（网页下载，R2 自定义域）· `UPDATE_DOMAIN` = **https://update.buctone.cc.cd**（App 升级 json + APK，与 dl 同桶同对象）· `PAGES_DEV` = buct-one-web.pages.dev（建项目后确定）。正文占位符号均按此解析；面板配置清单见 §8.5。
 
 ## 0. 输入材料、代码权威与差异裁定
 
@@ -550,7 +550,7 @@ R2 latest.json（6s，重试 1）→ 败则 GitHub API（可选 token）→ 再�
 - Bucket CORS：
 
 ```json
-[{ "AllowedOrigins": ["https://www.buctone.cc.cd", "https://buctone.cc.cd", "https://*.buct-one-web.pages.dev"],
+[{ "AllowedOrigins": ["https://buctone.cc.cd", "https://www.buctone.cc.cd", "https://*.buct-one-web.pages.dev"],
    "AllowedMethods": ["GET", "HEAD"], "AllowedHeaders": ["*"],
    "ExposeHeaders": ["ETag"], "MaxAgeSeconds": 86400 }]
 ```
@@ -570,9 +570,9 @@ R2 latest.json（6s，重试 1）→ 败则 GitHub API（可选 token）→ 再�
 | 构建命令 | `npm run build`（= `node scripts/prefetch-release.mjs && astro build`） |
 | 输出目录 | `dist` |
 | Node | 22（`.node-version` 或 NODE_VERSION=22） |
-| 环境变量 | PUBLIC_SITE_DOMAIN=`https://www.buctone.cc.cd` · PUBLIC_DL_DOMAIN=`https://dl.buctone.cc.cd` · GITHUB_TOKEN（可选 secret，仅构建期） |
+| 环境变量 | PUBLIC_SITE_DOMAIN=`https://buctone.cc.cd` · PUBLIC_DL_DOMAIN=`https://dl.buctone.cc.cd` · GITHUB_TOKEN（可选 secret，仅构建期） |
 | 预览 | PR 自动；预览 PUBLIC_* 用预览环境变量覆写 |
-| 自定义域 | `www.buctone.cc.cd`（已确认，配置见 §8.5）；apex `buctone.cc.cd` 301→www 由 Redirect Rule 完成 |
+| 自定义域 | `buctone.cc.cd`（apex 主域，已确认，配置见 §8.5）；`www.buctone.cc.cd` 301→根 由 Redirect Rule 完成 |
 | 构建失败 | 预取永不 fail build；仅 astro build 失败才红 |
 
 ### 8.2 `public/_headers`（全文）
@@ -614,7 +614,7 @@ HTML=ETag 协商；/assets/*=immutable 1 年；/shots/*、/og/*=7 天+SWR 1 天�
 
 ### 8.5 域名与 Cloudflare 面板配置清单（2026-11-20 确认）
 
-拓扑：**一个 R2 桶挂两个自定义域**（dl 网页 / update App，同桶同对象）；**Pages 只绑 www**；**apex 用 Redirect Rule 301 到 www**（apex 不绑 Pages）。
+拓扑：**一个 R2 桶挂两个自定义域**（dl 网页 / update App，同桶同对象）；**Pages 绑 apex 根域**；**www 用 Redirect Rule 301 到根**（www 不绑 Pages）。
 
 **A. 前提**：`buctone.cc.cd` zone 已托管 CF（cc.cd 平台把 NS 委派给 CF；R2 自定义域能绑即说明已满足）。Universal SSL 自动覆盖 apex + `*.buctone.cc.cd`，证书几分钟内签发。
 
@@ -622,20 +622,20 @@ HTML=ETag 协商；/assets/*=immutable 1 年；/shots/*、/og/*=7 天+SWR 1 天�
 1. Custom Domains → Add：`dl.buctone.cc.cd` 与 `update.buctone.cc.cd` 各加一次（同桶允许多域）。绑定自动创建 proxied CNAME + 证书。**不要开 r2.dev**（限流、无缓存栈）。
 2. CORS Policy → Edit JSON（网页 fetch 跨源必需；App OkHttp 不受 CORS 约束，配了也无害）：
 ```json
-[{ "AllowedOrigins": ["https://www.buctone.cc.cd", "https://buctone.cc.cd", "https://*.buct-one-web.pages.dev"],
+[{ "AllowedOrigins": ["https://buctone.cc.cd", "https://www.buctone.cc.cd", "https://*.buct-one-web.pages.dev"],
    "AllowedMethods": ["GET", "HEAD"], "AllowedHeaders": ["*"],
    "ExposeHeaders": ["ETag"], "MaxAgeSeconds": 86400 }]
 ```
 3. 缓存以**对象元数据**为权威（§7.2 上传时写 Cache-Control/Content-Type），无需额外 Cache Rules。
 
-**C. DNS**：dl/update/www 的 CNAME 由绑定自动创建（橙云 proxied）；**手工补一条**：`@  CNAME  buct-one-web.pages.dev`，Proxy on（apex 自动 CNAME flattening），供 Redirect Rule 在边缘拦截。
+**C. DNS**：dl/update 的 CNAME 由 R2 绑定自动创建（橙云 proxied）；apex `buctone.cc.cd` 由 Pages 自定义域绑定自动创建（CF 内部 CNAME flattening，橙云）；**手工补一条** `www  CNAME  buct-one-web.pages.dev`，Proxy on，供 www→根 的 Redirect Rule 在边缘拦截。
 
-**D. Workers & Pages → Create → Pages → Connect to Git**：项目 buct-one-web；生产分支 main；构建命令 `npm run build`；输出 `dist`；NODE_VERSION=22；环境变量按 §8.1；Custom domains → 添加 `www.buctone.cc.cd`（自动 CNAME + 证书）。
+**D. Workers & Pages → Create → Pages → Connect to Git**：项目 buct-one-web；生产分支 main；构建命令 `npm run build`；输出 `dist`；NODE_VERSION=22；环境变量按 §8.1；Custom domains → 添加 `buctone.cc.cd`（apex 主域，自动创建记录 + 证书）。
 
-**E. Rules → Redirect Rules → Create rule**（apex → www）：
-- Name：`apex-to-www`；When incoming requests match：`(http.host eq "buctone.cc.cd")`
-- Then：Dynamic redirect，表达式 `concat("https://www.buctone.cc.cd", http.request.uri.path)`，Status **301**，Preserve query string **on**。
-- 备选（不推荐）：apex 也绑 Pages + `_redirects` 写 `https://buctone.cc.cd/* https://www.buctone.cc.cd/:splat 301!`。
+**E. Rules → Redirect Rules → Create rule**（www → 根）：
+- Name：`www-to-apex`；When incoming requests match：`(http.host eq "www.buctone.cc.cd")`
+- Then：Dynamic redirect，表达式 `concat("https://buctone.cc.cd", http.request.uri.path)`，Status **301**，Preserve query string **on**。
+- 备选（不推荐）：www 也绑 Pages + `_redirects` 写 `https://www.buctone.cc.cd/* https://buctone.cc.cd/:splat 301!`。
 
 **F. SSL/TLS**：模式 **Full (strict)**；Always Use HTTPS **on**。
 
@@ -646,9 +646,9 @@ HTML=ETag 协商；/assets/*=immutable 1 年；/shots/*、/og/*=7 天+SWR 1 天�
 **I. 验证（pwsh 用 curl.exe）**：
 ```
 curl.exe -sI https://dl.buctone.cc.cd/meta/latest.json          # 200 + cache-control: public, max-age=60, stale-while-revalidate=300
-curl.exe -sI -H "Origin: https://www.buctone.cc.cd" https://dl.buctone.cc.cd/meta/latest.json   # 出现 access-control-allow-origin
-curl.exe -sI https://buctone.cc.cd/                            # 301 + location: https://www.buctone.cc.cd/
-curl.exe -sI https://www.buctone.cc.cd/                        # 200（Pages 部署后）
+curl.exe -sI -H "Origin: https://buctone.cc.cd" https://dl.buctone.cc.cd/meta/latest.json   # 出现 access-control-allow-origin
+curl.exe -sI https://buctone.cc.cd/                            # 200（Pages 部署后，主域）
+curl.exe -sI https://www.buctone.cc.cd/                        # 301 + location: https://buctone.cc.cd/
 curl.exe -sI https://update.buctone.cc.cd/meta/latest.json     # 200，与 dl 内容一致
 ```
 
@@ -663,18 +663,18 @@ curl.exe -sI https://update.buctone.cc.cd/meta/latest.json     # 200，与 dl �
    → SaaS 边缘(custom hostname=dl, fallback=r2-origin.buctone.cc.cd, Host 重写为 fallback)
    → r2-origin.buctone.cc.cd [橙云, R2 自定义域绑定] → 桶
  www 同理(fallback=pages-origin.buctone.cc.cd, Pages 绑 pages-origin)
- apex：SaaS custom hostname + 在 SaaS zone 做 301→www
+ apex：SaaS custom hostname（主域直出）；www：SaaS custom hostname + 在 SaaS zone 做 301→根
  update：保持 R2 官方绑定（App 非浏览器，无需优选）
 ```
 
 配置步骤：
 1. **第二个 zone 作 SaaS zone**（另备一个域名，如免费 buctone-cdn.cc.cd，NS 托管 CF；Free plan 支持 SSL for SaaS）。若用社区公共 SaaS 服务，则在其面板加 custom hostname，跳过自建（稳定性/ToS 自负）。
-2. SaaS zone：`proxy A 192.0.2.1` 橙云（SaaS 边缘拦截，不会真回源该 IP）；SSL for SaaS → Custom Hostnames 添加 dl / www / apex，fallback origin 分别 = r2-origin / pages-origin / pages-origin；**DCV 用 TXT**（两级 CNAME 会破坏 CNAME 校验）。
+2. SaaS zone：`proxy A 192.0.2.1` 橙云（SaaS 边缘拦截，不会真回源该 IP）；SSL for SaaS → Custom Hostnames 添加 dl / apex / www，fallback origin 分别 = r2-origin / pages-origin / pages-origin；**DCV 用 TXT**（两级 CNAME 会破坏 CNAME 校验）。
 3. 业务 zone DNS（**灰云**，两法任选；**解除 dl/www 的 R2/Pages 直接绑定**）：
    - **法①（推荐，已有决策）：灰云 A 记录直指 3–4 个不同优选 IP 段**（如 162.159.129.x / 104.18.34.x / 104.18.13.x / 172.64.153.x；**不用 cdn.cloudflare.net，不用 203.22.241.x**）。省掉 cdn 层，换优选只改 A 记录；灰云 A 指 CF IP 不触发 Error 1000（1000 只查橙云记录）。
    - 法②（用户两级 CNAME 思路，作切换层）：dl/www/@ 灰云 CNAME → cdn.buctone.cc.cd；cdn 灰云 CNAME → proxy.<SaaS zone>（橙云）。**最终目标必须是自己可控的 SaaS 端点**——陌生公共优选域无法在其 zone 给你的 Host 加 custom hostname；若该公共域是允许登记的公共 SaaS 服务则在其面板加 hostname、fallback=r2-origin。此法 DCV 必须用 TXT（两级 CNAME 破坏 CNAME 校验）。
 4. R2 自定义域改绑 `r2-origin.buctone.cc.cd`；Pages 自定义域改绑 `pages-origin.buctone.cc.cd`（均自动橙云记录）。桶 CORS、对象元数据不变。
-5. **apex→www 的 Redirect Rule 移到 SaaS zone**（请求到业务 zone 边缘时 Host 已被重写为 pages-origin，原规则匹配不到）。
+5. **www→根 的 Redirect Rule 移到 SaaS zone**（请求到业务 zone 边缘时 Host 已被重写为 pages-origin，原规则匹配不到）。
 6. 缓存两层（SaaS 边缘 + 回源边缘）都尊重对象 Cache-Control，latest.json 60s 仍成立；主动 purge 需两 zone 都 purge 或等 TTL。
 7. 确认 SaaS 以 Host=fallback origin 回源（默认行为；面板若有 preserve-host 选项须关）。
 
@@ -783,7 +783,7 @@ buct-one-web/
 
 | # | 事项 | 影响 | 当前默认/占位 | 需谁确认 |
 |---|---|---|---|---|
-| 1 | ~~SITE_DOMAIN 未定~~ **已确认** www.buctone.cc.cd（apex 301→www） | CSP/OG/CORS/sitemap | §8.5 照单配置 | ✅ |
+| 1 | ~~SITE_DOMAIN 未定~~ **已确认** buctone.cc.cd（apex 主域；www 301→根） | CSP/OG/CORS/sitemap | §8.5 照单配置 | ✅ |
 | 2 | ~~DL_DOMAIN 未定~~ **已确认** dl.buctone.cc.cd；App 源 update.buctone.cc.cd（同桶） | apkUrl/主源/CORS | §7.2/§8.5 | ✅ |
 | 3 | ~~R2 公开方式~~ **已确认** 自定义域 ×2，不开 r2.dev | 限流/缓存 | §8.5 | ✅ |
 | 4 | Action 上传侧按 §7.2/7.3 契约（元数据/顺序） | M2 联调阻塞 | 契约本文冻结 | 用户 |

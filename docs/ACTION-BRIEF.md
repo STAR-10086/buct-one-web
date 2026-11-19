@@ -119,7 +119,7 @@ Secrets：`R2_ACCESS_KEY_ID`、`R2_SECRET_ACCESS_KEY`、`R2_ACCOUNT_ID`。
 ```
 curl.exe -sI https://dl.buctone.cc.cd/meta/latest.json        # 200 + cache-control: public, max-age=60, stale-while-revalidate=300
 curl.exe -s  https://dl.buctone.cc.cd/meta/changelog.md       # 与仓库 CHANGELOG.md 一致
-curl.exe -sI -H "Origin: https://www.buctone.cc.cd" https://dl.buctone.cc.cd/meta/latest.json  # access-control-allow-origin 出现
+curl.exe -sI -H "Origin: https://buctone.cc.cd" https://dl.buctone.cc.cd/meta/latest.json  # access-control-allow-origin 出现
 curl.exe -sI https://update.buctone.cc.cd/meta/latest.json    # 200，与 dl 内容一致
 curl.exe -sI https://dl.buctone.cc.cd/apk/latest/arm64-v8a/buct-one-latest.apk  # 200 + max-age=60
 ```
