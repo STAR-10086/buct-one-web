@@ -6,7 +6,7 @@ export interface Release {
 }
 const DL = (import.meta.env.PUBLIC_DL_DOMAIN || 'https://dl.buct.one').replace(/\/$/, '');
 const GH_API = 'https://api.github.com/repos/STAR-10086/buct-one/releases/latest';
-const CACHE_KEY = 'buctone.release';
+const CACHE_KEY = 'buctone.release.v2';
 const BACKOFF_KEY = 'buctone.ghBackoff';
 const ETAG_KEY = 'buctone.ghEtag';
 const TTL = 6 * 3600 * 1000;
@@ -90,7 +90,7 @@ async function fetchGitHub(): Promise<Release | null> {
   } catch { return null; }
 }
 export function readCache(): { fetchedAt: number; data: Release } | null {
-  try { const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); return c && c.data ? c : null; } catch { return null; }
+  try { const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); return c && c.data ? { ...c, data: normalize(c.data) } : null; } catch { return null; }
 }
 function writeCache(data: Release): void {
   try { localStorage.setItem(CACHE_KEY, JSON.stringify({ fetchedAt: Date.now(), data })); } catch { /* noop */ }
@@ -207,7 +207,7 @@ export function showToast(msg: string): void {
 }
 
 /* ── 更新日志：运行时从 R2 拉全量 CHANGELOG.md，失败保留构建期内容 ── */
-const CL_CACHE_KEY = 'buctone.changelog';
+const CL_CACHE_KEY = 'buctone.changelog.v2';
 export async function refreshChangelog(): Promise<string | null> {
   try {
     const raw = localStorage.getItem(CL_CACHE_KEY);
@@ -216,7 +216,7 @@ export async function refreshChangelog(): Promise<string | null> {
   try {
     const res = await fetchTimeout(DL + '/meta/changelog.md', { cache: 'no-cache' }, 6000);
     if (!res.ok) return null;
-    const text = await res.text();
+    const text = (await res.text()).replace(/buctone\.cc\.cd/gi, 'buct.one');
     if (!text.trim() || !/^## /m.test(text)) return null;
     try { localStorage.setItem(CL_CACHE_KEY, JSON.stringify({ fetchedAt: Date.now(), text })); } catch { /* noop */ }
     return text;
