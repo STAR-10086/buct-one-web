@@ -3,7 +3,7 @@ import { writeFile, copyFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-const DL = (process.env.PUBLIC_DL_DOMAIN || 'https://dl.buctone.cc.cd').replace(/\/$/, '');
+const DL = (process.env.PUBLIC_DL_DOMAIN || 'https://dl.buct.one').replace(/\/$/, '');
 const SNAP = ROOT + 'src/data/release-snapshot.json';
 const CL_CACHE = ROOT + 'src/data/changelog-cache.md';
 const CL_FALLBACK = ROOT + 'src/data/changelog-fallback.md';
@@ -39,6 +39,9 @@ if (!snapshot) {
   } catch (e) { console.warn('[prefetch] GitHub fail:', e.message); }
 }
 if (snapshot) {
+  const FIX = (s) => typeof s === 'string' ? s.replace(/buctone\.cc\.cd/gi, 'buct.one') : s;
+  snapshot.apkUrl = FIX(snapshot.apkUrl);
+  if (snapshot.changelogMd) snapshot.changelogMd = FIX(snapshot.changelogMd);
   snapshot.fetchedAt = new Date().toISOString(); snapshot.source = source;
   await writeFile(SNAP, JSON.stringify(snapshot, null, 2) + '\n');
   console.log('[prefetch] snapshot from', source, 'v' + snapshot.version);
@@ -46,8 +49,8 @@ if (snapshot) {
   console.warn('[prefetch] both sources failed; keeping committed snapshot');
 }
 let clDone = false;
-try { const r = await ft(DL + '/meta/changelog.md', { cache: 'no-cache' }); if (r.ok) { const t = await r.text(); if (t.trim()) { await writeFile(CL_CACHE, t); console.log('[prefetch] changelog from R2'); clDone = true; } } } catch (e) { console.warn('[prefetch] R2 changelog fail:', e.message); }
+try { const r = await ft(DL + '/meta/changelog.md', { cache: 'no-cache' }); if (r.ok) { const t = await r.text(); if (t.trim()) { await writeFile(CL_CACHE, t.replace(/buctone\.cc\.cd/gi, 'buct.one')); console.log('[prefetch] changelog from R2'); clDone = true; } } } catch (e) { console.warn('[prefetch] R2 changelog fail:', e.message); }
 if (!clDone) {
-  try { const r = await ft(RAW_CL); if (r.ok) { await writeFile(CL_CACHE, await r.text()); console.log('[prefetch] changelog from raw'); clDone = true; } else throw new Error('HTTP ' + r.status); }
+  try { const r = await ft(RAW_CL); if (r.ok) { await writeFile(CL_CACHE, (await r.text()).replace(/buctone\.cc\.cd/gi, 'buct.one')); console.log('[prefetch] changelog from raw'); clDone = true; } else throw new Error('HTTP ' + r.status); }
   catch { if (existsSync(CL_FALLBACK)) { await copyFile(CL_FALLBACK, CL_CACHE); console.log('[prefetch] changelog fallback'); } }
 }

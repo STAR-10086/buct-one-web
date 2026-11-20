@@ -7,7 +7,7 @@ import Dock from '../components/Dock.astro';
 import Footer from '../components/Footer.astro';
 interface Props { title: string; description?: string; }
 const { title, description = 'BUCT One · 北化一站 —— 北化人的原生液态玻璃校园工作台。本地优先，零第三方上报。' } = Astro.props;
-const site = Astro.site?.origin ?? 'https://buctone.cc.cd';
+const site = Astro.site?.origin ?? 'https://buct.one';
 const canonical = new URL(Astro.url.pathname, site).href;
 ---
 <!doctype html>

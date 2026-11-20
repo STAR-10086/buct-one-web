@@ -4,12 +4,27 @@ export interface Release {
   publishedAt: string; changelogMd?: string; githubReleaseUrl?: string;
   minSdk?: number; abi?: string; fetchedAt?: string; source?: string;
 }
-const DL = (import.meta.env.PUBLIC_DL_DOMAIN || 'https://dl.buctone.cc.cd').replace(/\/$/, '');
+const DL = (import.meta.env.PUBLIC_DL_DOMAIN || 'https://dl.buct.one').replace(/\/$/, '');
 const GH_API = 'https://api.github.com/repos/STAR-10086/buct-one/releases/latest';
 const CACHE_KEY = 'buctone.release';
 const BACKOFF_KEY = 'buctone.ghBackoff';
 const ETAG_KEY = 'buctone.ghEtag';
 const TTL = 6 * 3600 * 1000;
+
+// 下载域迁移兜底：R2 里历史 meta/latest.json 的 apkUrl 仍指向旧域，读入时归一化
+const OLD_DL_HOST = /^(dl|update)\.buctone\.cc\.cd$/i;
+const fixDomain = (url: string): string => {
+  try {
+    const u = new URL(url);
+    if (OLD_DL_HOST.test(u.hostname)) return DL + u.pathname + u.search;
+  } catch { /* noop */ }
+  return url;
+};
+const normalize = (r: Release): Release => ({
+  ...r,
+  apkUrl: fixDomain(r.apkUrl),
+  changelogMd: r.changelogMd ? r.changelogMd.replace(/buctone\.cc\.cd/gi, 'buct.one') : r.changelogMd,
+});
 
 function assert(r: any): r is Release {
   return r && typeof r.version === 'string' && typeof r.tag === 'string'
@@ -28,7 +43,7 @@ async function fetchR2(): Promise<Release | null> {
       const res = await fetchTimeout(DL + '/meta/latest.json', { cache: 'no-cache' });
       if (!res.ok) continue;
       const j = await res.json();
-      if (assert(j)) return { ...j, source: 'r2' };
+      if (assert(j)) return normalize({ ...j, source: 'r2' });
     } catch { /* retry */ }
   }
   return null;
@@ -71,7 +86,7 @@ async function fetchGitHub(): Promise<Release | null> {
       if (side) { try { const t = await (await fetchTimeout(side.browser_download_url)).text(); const m = t.match(/[a-f0-9]{64}/i); if (m) sha = m[0].toLowerCase(); } catch { /* noop */ } }
     }
     const r = mapGitHub(j, sha);
-    return r && assert(r) ? r : null;
+    return r && assert(r) ? normalize(r) : null;
   } catch { return null; }
 }
 export function readCache(): { fetchedAt: number; data: Release } | null {
