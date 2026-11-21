@@ -2,40 +2,50 @@
 import snapshot from '../data/release-snapshot.json';
 import Icon from './Icon.astro';
 import Sha256Row from './Sha256Row.astro';
+import { miniMarkdown } from '../lib/release';
+
 const r = snapshot as any;
+const tag = r.tag || ('v' + r.version);
 const sizeText = r.sizeBytes > 0 ? (r.sizeBytes / 1048576).toFixed(1) + ' MB' : '—';
 const dateText = String(r.publishedAt || '').slice(0, 10);
+
+// 硬编码 R2 latest 固定短链，零 R2 元数据查询开销
+const r2LatestApkUrl = 'https://dl.buct.one/apk/latest/arm64-v8a/buct-one-latest.apk';
+const githubApkUrl = `https://github.com/STAR-10086/buct-one/releases/download/${tag}/buct-one-${tag}-arm64-v8a.apk`;
+const githubReleaseUrl = r.githubReleaseUrl || `https://github.com/STAR-10086/buct-one/releases/tag/${tag}`;
+const changelogHtml = r.changelogMd ? miniMarkdown(r.changelogMd) : '';
 ---
 <section class="release">
   <div class="cap-chip version-chip">
     <strong data-rel="version">{'v' + r.version}</strong>
     <span data-rel="date">{dateText}</span>
     <span data-rel="size">{sizeText}</span>
-    <span class="cap-chip badge" data-rel="badge">离线快照</span>
-    <button class="cap-icondot" type="button" data-rel-refresh aria-label="刷新版本信息"><span><Icon name="refresh" /></span></button>
+    <span class="cap-chip badge">最新正式版</span>
   </div>
   <div class="grid grid-2 sources">
     <article class="glass-content cap-card source-card">
-      <h3>官网直连 <span class="cap-chip soon">推荐</span></h3>
-      <p>Cloudflare R2 全球加速，自动跟随最新正式版。</p>
-      <a class="btn btn-primary btn-lg" data-rel="apk-href" href={r.apkUrl} data-jelly>
-        <Icon name="download" /> 下载 APK
+      <h3>Cloudflare R2 下载 <span class="cap-chip soon">推荐</span></h3>
+      <p>国内与校园网高速直连，固定拉取最新正式版安装包（arm64-v8a）。</p>
+      <a class="btn btn-primary btn-lg" href={r2LatestApkUrl} data-jelly>
+        <Icon name="download" /> 通过 Cloudflare R2 下载
       </a>
     </article>
     <article class="glass-content cap-card source-card">
-      <h3>GitHub Release</h3>
-      <p>原始发布页，含历史版本与完整更新说明。</p>
-      <a class="btn btn-secondary btn-lg" data-rel="gh-href" href={r.githubReleaseUrl} target="_blank" rel="noopener">
-        <Icon name="github" /> 前往 Release
+      <h3>GitHub 下载</h3>
+      <p>从 GitHub Release 源下载当前版本安装包（<a href={githubReleaseUrl} target="_blank" rel="noopener" class="release-link">查看其它架构与历史版本 →</a>）。</p>
+      <a class="btn btn-secondary btn-lg" href={githubApkUrl} target="_blank" rel="noopener">
+        <Icon name="github" /> 通过 GitHub 下载
       </a>
     </article>
   </div>
   <Sha256Row sha={r.sha256} />
-  <div class="glass-content cap-card changelog-preview">
-    <h4>本版更新</h4>
-    <div class="md" data-rel="changelog"><p class="label">加载更新说明中…若长时间无内容，请查看 GitHub Release。</p></div>
-    <a href="/changelog" class="label">查看完整更新日志 →</a>
-  </div>
+  {changelogHtml && (
+    <div class="glass-content cap-card changelog-preview">
+      <h4>本版更新</h4>
+      <div class="md" set:html={changelogHtml} />
+      <a href="/changelog" class="label">查看完整更新日志 →</a>
+    </div>
+  )}
 </section>
 <style>
   .release { display: grid; gap: 16px; min-width: 0; max-width: 100%; }
@@ -46,14 +56,18 @@ const dateText = String(r.publishedAt || '').slice(0, 10);
   .changelog-preview { min-width: 0; }
   .source-card h3 { display: flex; align-items: center; gap: 8px; color: var(--on-glass); }
   .source-card p { font-size: 14px; color: var(--on-glass-variant); }
+  .release-link { color: var(--primary); text-decoration: none; }
+  .release-link:hover { text-decoration: underline; }
   .changelog-preview { display: grid; gap: 10px; }
   .md :global(h3), .md :global(h4) { font-size: 16px; margin: 8px 0 4px; color: var(--on-glass); }
   .md :global(ul) { padding-left: 20px; display: grid; gap: 4px; }
   .md :global(li), .md :global(p) { font-size: 14px; line-height: 20px; color: var(--on-glass-variant); }
   .md :global(code) { font-family: var(--font-mono); font-size: 12px; }
+  .md :global(table) { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; display: block; overflow-x: auto; }
+  .md :global(th), .md :global(td) { border: 1px solid var(--glass-border); padding: 6px 8px; text-align: left; vertical-align: top; color: var(--on-glass-variant); white-space: nowrap; }
+  .md :global(th) { background: var(--glass-control); color: var(--on-glass); font-weight: 600; }
 </style>
 <script>
-  import { initRelease } from '../lib/release';
-  import snapshot from '../data/release-snapshot.json';
-  initRelease(snapshot as any);
+  import { initCopySha } from '../lib/release';
+  initCopySha();
 </script>

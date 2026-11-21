@@ -5,7 +5,7 @@ import { readFileSync, existsSync } from 'node:fs';
 const dataDir = process.cwd() + '/src/data/';
 const cachePath = dataDir + 'changelog-cache.md';
 const fallbackPath = dataDir + 'changelog-fallback.md';
-const raw = readFileSync(existsSync(cachePath) ? cachePath : fallbackPath, 'utf-8');
+const raw = readFileSync(existsSync(fallbackPath) ? fallbackPath : cachePath, 'utf-8');
 const chunks = raw.split(/^## /m).slice(1);
 const versions = chunks.map((chunk) => {
   const nl = chunk.indexOf('\n');
@@ -22,10 +22,10 @@ const versions = chunks.map((chunk) => {
     <div>
       <p class="eyebrow">Changelog</p>
       <h1>更新日志</h1>
-      <p class="lead">面向用户的实质性功能新增、问题修复与架构演进。「开发中」条目尚未发布。<span class="cl-badge" data-changelog-badge>构建时快照</span></p>
+      <p class="lead">面向用户的实质性功能新增、问题修复与架构演进，随每次正式版发布自动构建更新。</p>
     </div>
   </section>
-  <section class="wrap section timeline" data-changelog-root>
+  <section class="wrap section timeline">
     {versions.map((v) => (
       <article class="glass-content cap-card version-card" id={'v' + v.name.replace(/\./g, '-')}>
         <div class="version-head">
@@ -38,13 +38,8 @@ const versions = chunks.map((chunk) => {
     ))}
   </section>
 </Base>
-<script>
-  import { initChangelog } from '../lib/release';
-  initChangelog();
-</script>
 <style is:global>
   .changelog-head { display: grid; grid-template-columns: 1fr; gap: 12px; align-items: center; }
-  .cl-badge { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 10px; font-size: 11px; line-height: 16px; font-weight: 600; background: var(--primary-container); color: var(--primary); white-space: nowrap; }
   .timeline { display: grid; gap: 16px; }
   .version-card { display: grid; gap: 10px; }
   .version-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
