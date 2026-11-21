@@ -1,8 +1,21 @@
 ---
-interface Props { accent?: number; title?: string; badge?: string; }
-const { accent = 0, title, badge } = Astro.props;
+interface Props {
+  accent?: number;
+  title?: string;
+  badge?: string;
+  reveal?: boolean;
+  spotlight?: boolean;
+  class?: string;
+}
+const { accent = 0, title, badge, reveal = true, spotlight = true, class: className = '' } = Astro.props;
 ---
-<article class="glass-content cap-card feature-card">
+<article
+  class={['glass-content', 'cap-card', 'feature-card', spotlight ? 'spotlight-card' : '', className]
+    .filter(Boolean)
+    .join(' ')}
+  data-spotlight={spotlight ? '' : undefined}
+  data-reveal={reveal ? '' : undefined}
+>
   {accent > 0 && <span class="accent-bar" style={'background: var(--block-' + accent + ')'}></span>}
   <div class="feature-body">
     {title && <h4>{title}{badge && <span class="cap-chip soon">{badge}</span>}</h4>}

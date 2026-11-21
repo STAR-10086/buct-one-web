@@ -3,58 +3,71 @@ import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import GlassCard from '../components/GlassCard.astro';
 import PhoneShot from '../components/PhoneShot.astro';
+import snapshot from '../data/release-snapshot.json';
 ---
 <Base title="BUCT One · 北化一站 — 北化人自己的校园工作台">
   <section class="wrap hero">
     <div class="hero-text">
-      <p class="eyebrow">BUCT One · 北京化工大学</p>
-      <h1>北化人自己的<br />校园工作台</h1>
-      <p class="lead">一次原生登录，串起课表、成绩、作业、实践教学与校园卡。本地优先，零第三方上报——你的数据只留在你的手机上。</p>
-      <div class="hero-cta">
+      <div class="hero-eyebrow-row" data-reveal>
+        <p class="eyebrow">BUCT One · 北京化工大学</p>
+        <a class="cap-chip version-pill" href="/changelog">v{snapshot.version} 正式版</a>
+      </div>
+      <h1 data-reveal>北化人自己的<br />校园工作台</h1>
+      <p class="lead" data-reveal>一次原生登录学校统一身份认证，串起课表与桌面小组件、成绩与培养方案、北化在线、i北化（校历/资讯/图书）、教务消息、第二课堂、实践教学、体测、校园邮箱与校园一卡通——本地优先，零商业埋点 SDK。</p>
+      <div class="hero-cta" data-reveal>
         <a class="btn btn-primary btn-lg" href="/download" data-jelly><Icon name="download" /> 下载 Android 版</a>
         <a class="btn btn-ghost btn-lg" href="https://github.com/STAR-10086/buct-one" target="_blank" rel="noopener"><Icon name="github" /> 查看源码</a>
       </div>
-      <div class="hero-chips">
+      <div class="hero-chips" data-reveal>
         <span class="cap-chip">Android 7.0+</span>
         <span class="cap-chip">GPL-3.0 开源</span>
-        <span class="cap-chip">零遥测</span>
-        <span class="cap-chip">密码不落盘</span>
+        <span class="cap-chip">零商业埋点</span>
+        <span class="cap-chip">明文不落盘</span>
+        <span class="cap-chip">预测性返回</span>
       </div>
     </div>
     <div class="hero-visual">
       <span class="lens lens-a" data-lens style="width:120px;height:120px;left:8%;top:6%"><span class="lit-glow"></span></span>
       <span class="lens lens-b" data-lens style="width:180px;height:64px;right:4%;bottom:10%"><span class="lit-glow"></span></span>
-      <PhoneShot id="workbench" label="工作台首屏" />
+      <PhoneShot id="workbench" label="工作台首屏" zoomable={false} tilt={true} reveal={false} eager={true} />
     </div>
   </section>
 
   <section class="wrap section" id="privacy">
-    <div class="section-head"><h2>你的凭据，只属于你的手机</h2></div>
+    <div class="section-head" data-reveal><h2>你的凭据，只属于你的手机</h2></div>
     <div class="grid grid-4">
-      <GlassCard accent={1} title="原生统一认证"><p>SM2/AES + 短信二次验证 + Passkey，全原生 Kotlin 实现，无 WebView 登录。</p></GlassCard>
-      <GlassCard accent={3} title="Keystore 加密"><p>凭据由 Android Keystore AES-GCM 独立加密；学号密码绝不写盘，内存用后清零。</p></GlassCard>
-      <GlassCard accent={5} title="校方证书链"><p>全网强制校方证书链校验，CI 静态禁止 trustAllCerts 与任意 HostnameVerifier。</p></GlassCard>
-      <GlassCard accent={8} title="本地优先"><p>分域原子落盘，同步失败绝不清空旧缓存；课表、成绩、作业离线时刻可读。</p></GlassCard>
+      <GlassCard accent={1} title="原生认证 · 静默续期"><p>SM2/AES + 短信二次验证 + Passkey 全原生 Kotlin 实现，无 WebView 登录；SsoSilentRelogin 单飞静默续期。</p></GlassCard>
+      <GlassCard accent={3} title="Keystore 加密 · 明文不落盘"><p>可选本机 Android Keystore（AES-256-GCM）独立别名加密凭据并排除云备份，内存 char[] 用后清零。</p></GlassCard>
+      <GlassCard accent={5} title="校方证书链 · 混合 DNS"><p>全网强制 BuctTlsTrustManager 证书链校验，CI 禁止 trustAllCerts；BuctDns 兼顾校内/VPN 与校外访问。</p></GlassCard>
+      <GlassCard accent={8} title="本地优先 · 零商业埋点"><p>分域原子落盘，同步失败绝不清空旧缓存；零第三方商业 SDK（自托管匿名统计可一键关闭）。</p></GlassCard>
     </div>
   </section>
 
   <section class="wrap section" id="features">
-    <div class="section-head"><h2>一个 App，装下整个校园</h2><a href="/download" class="label">立即获取 →</a></div>
+    <div class="section-head" data-reveal><h2>一个 App，装下整个校园</h2><a href="/download" class="label">立即获取 →</a></div>
     <div class="grid grid-3">
-      <GlassCard accent={1} title="课表与小组件"><p>周/日视图、i北化官方校历自动校准、课前提醒；桌面周课表与今日课表小组件，HyperOS/OriginOS 适配。</p></GlassCard>
-      <GlassCard accent={4} title="成绩 · GPA"><p>分学期成绩、GPA 统计、培养方案与考试倒计时，本科 / 研究生教务一键切换。</p></GlassCard>
-      <GlassCard accent={3} title="北化在线作业"><p>两阶段后台静默同步全部在修课程作业与测验，原生预览要求、下载附件，一键提交。</p></GlassCard>
-      <GlassCard accent={6} title="实践教学"><p>实验排课课表、开放讲座一键抢报与前台蹲守、已报讲座退选与心得、创新学分明细查询。</p></GlassCard>
-      <GlassCard accent={7} title="校园一卡通"><p>独立认证查询实时余额、挂失状态与消费流水，支持本机 Keystore 加密记住密码与自动续期。</p></GlassCard>
-      <GlassCard accent={8} title="校园邮箱 · 教务消息"><p>免密换票直连 mail.buct.edu.cn 收件箱（同步官方已读/删除/附件），独立采集教务调停课消息与公告。</p></GlassCard>
-      <GlassCard accent={5} title="2D 自由栅格工作台"><p>10 大核心模块，2×1 / 1×1 / 0.5×0.5 卡片自由混排，长按弹簧拖拽，最多 30 步撤回。</p></GlassCard>
-      <GlassCard accent={2} title="选课 · 空闲教室"><p>可选列表 / 已选退课 / 定时并发抢课，空闲教室实时查询，课表一键导出 ICS 日历。</p></GlassCard>
-      <GlassCard accent={9} title="第二课堂 · 体测 · i北化"><p>五育综测得分明细、体测成绩与 2014 国标离线算分、校内四栏综合资讯与图书馆在借清单。</p></GlassCard>
+      <GlassCard accent={1} title="课表与桌面小组件"><p>周/日视图、i北化官方校历自动校准教学周、课前提醒；桌面周课表与可滚动今日课表小组件，适配 HyperOS / OriginOS。</p></GlassCard>
+      <GlassCard accent={4} title="成绩 · GPA · 培养方案"><p>分学期成绩、GPA 统计、培养方案与考试倒计时，在「我的」支持本科（jwglxt）/ 研究生（gmis）教务一键切换。</p></GlassCard>
+      <GlassCard accent={3} title="北化在线作业与测验"><p>两阶段后台静默同步全部在修课程作业与测验，原生预览要求、下载附件，拉起共享会话一键提交。</p></GlassCard>
+      <GlassCard accent={6} title="实践教学 · 抢讲座"><p>实验排课课表、开放讲座一键抢报与 1.5s 满员捡漏蹲守、已报讲座退选与心得、创新学分明细查询。</p></GlassCard>
+      <GlassCard accent={7} title="校园一卡通"><p>独立认证查询实时余额、挂失状态与消费流水，可选本机 Keystore 加密记住密码自动重登，支持直达企微 / 微信。</p></GlassCard>
+      <GlassCard accent={8} title="校园邮箱 · 教务消息"><p>免密换票直连 mail.buct.edu.cn 收件箱（同步官方已读/删除还原/附件）；独立采集教务调停补课消息与通知公告。</p></GlassCard>
+      <GlassCard accent={5} title="2D 自由栅格工作台"><p>4 列自由坐标骨架收纳 10 大核心模块，2×1 / 1×1 / 0.5×0.5 自由混排，长按弹簧拖拽，支持最多 30 步撤回。</p></GlassCard>
+      <GlassCard accent={2} title="选课抢课 · 空闲教室"><p>可选列表 / 已选退课 / 定时并发抢课独立视图，空闲教室实时查询，课表一键导出 ICS 日历。</p></GlassCard>
+      <GlassCard accent={9} title="第二课堂 · 体测 · i北化"><p>五育综测得分明细、体测与阳光跑及 2014 国标离线算分、校内四栏综合资讯与图书馆在借清单。</p></GlassCard>
+    </div>
+    <div class="feature-wide-wrap">
+      <GlassCard accent={10} title="全局预测性返回 · 个性定制 · App 内自动更新" badge={'v' + snapshot.version}>
+        <p>全局适配 Android 14+ 预测性返回手势（跨 Activity 侧滑预览 + 应用内二级页跟手缩放圆角联动，可在「我的 → 外观」实时开关）；支持自定义头像、昵称、个性签名与壁纸，Phosphor 双色动画图标与暗色降级；冷启动与手动检查更新，按 ABI 自动匹配安装包并执行 SHA-256 与签名双重校验。</p>
+      </GlassCard>
     </div>
   </section>
 
   <section class="wrap section" id="shots">
-    <div class="section-head"><h2>液态玻璃，眼见为实</h2></div>
+    <div class="section-head" data-reveal>
+      <h2>液态玻璃，眼见为实</h2>
+      <span class="label">点击任意截图放大浏览</span>
+    </div>
     <div class="shots-row">
       <PhoneShot id="workbench" label="工作台" />
       <PhoneShot id="timetable" label="课表" />
@@ -65,7 +78,7 @@ import PhoneShot from '../components/PhoneShot.astro';
   </section>
 
   <section class="wrap section">
-    <div class="glass-content cap-card opensource">
+    <div class="glass-content cap-card spotlight-card opensource" data-spotlight data-reveal>
       <div>
         <h2>GPL-3.0 开源，欢迎监督与共建</h2>
         <p class="lead">代码完全公开，隐私承诺可被逐条验证。整合改造自 zhengfang-apk、beihua-kebiao 等优秀开源工程，完整声明见 NOTICE。</p>
@@ -77,11 +90,15 @@ import PhoneShot from '../components/PhoneShot.astro';
 <style>
   .hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 32px; align-items: center; padding-top: 48px; padding-bottom: 24px; }
   .hero-text { display: grid; gap: 16px; }
+  .hero-eyebrow-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .version-pill { height: 26px; padding: 0 10px; font-size: 11px; font-weight: 600; color: var(--primary); background: var(--primary-container); border: 0; text-decoration: none; }
+  .version-pill:hover { text-decoration: none; filter: brightness(0.98); }
   .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
   .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .hero-visual { position: relative; display: flex; justify-content: center; min-height: 480px; }
   .lens-a { z-index: 3; }
   .lens-b { z-index: 3; }
+  .feature-wide-wrap { margin-top: var(--card-pad); }
   .opensource { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between; padding: 28px; }
   .opensource h2 { margin-bottom: 8px; }
   @media (max-width: 900px) { .hero { grid-template-columns: 1fr; gap: 20px; padding-top: 24px; } .hero-visual { min-height: 0; order: -1; } }

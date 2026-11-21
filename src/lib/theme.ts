@@ -3,6 +3,8 @@ export type ThemeMode = 'auto' | 'light' | 'dark';
 export type GlassMode = 'auto' | 'full' | 'blur' | 'solid';
 const THEME_KEY = 'buctone.theme';
 const GLASS_KEY = 'buctone.glass';
+let themeMediaBound = false;
+
 export function readTheme(): ThemeMode {
   const v = localStorage.getItem(THEME_KEY);
   return v === 'light' || v === 'dark' ? v : 'auto';
@@ -26,14 +28,29 @@ export function cycleGlass(): GlassMode {
   const order: GlassMode[] = ['auto', 'full', 'blur', 'solid'];
   const next = order[(order.indexOf(readGlass()) + 1) % 4];
   localStorage.setItem(GLASS_KEY, next);
+  document.documentElement.dataset.glassChoice = next;
   return next;
 }
 export function initThemeControls(): void {
   applyTheme(readTheme());
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (readTheme() === 'auto') applyTheme('auto'); });
+  if (!themeMediaBound) {
+    themeMediaBound = true;
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (readTheme() === 'auto') applyTheme('auto');
+    });
+  }
   document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((btn) => {
-    const label = () => { const m = readTheme(); btn.setAttribute('aria-label', '主题：' + (m === 'auto' ? '跟随系统' : m === 'light' ? '浅色' : '深色')); btn.dataset.mode = m; };
+    const label = () => {
+      const m = readTheme();
+      btn.setAttribute('aria-label', '主题：' + (m === 'auto' ? '跟随系统' : m === 'light' ? '浅色' : '深色'));
+      btn.dataset.mode = m;
+    };
     label();
-    btn.addEventListener('click', () => { cycleTheme(); label(); });
+    if (btn.dataset.themeBound === '1') return;
+    btn.dataset.themeBound = '1';
+    btn.addEventListener('click', () => {
+      cycleTheme();
+      label();
+    });
   });
 }

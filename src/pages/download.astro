@@ -3,46 +3,47 @@ import Base from '../layouts/Base.astro';
 import GlassCard from '../components/GlassCard.astro';
 import ReleasePanel from '../components/ReleasePanel.astro';
 ---
-<Base title="下载 BUCT One · 北化一站" description="下载 BUCT One  Android 版：官网 R2 直连与 GitHub Release 双源，自动跟随最新版本，提供 SHA256 校验。">
+<Base title="下载 BUCT One · 北化一站" description="下载 BUCT One Android 版：官网 Cloudflare R2 直连与 GitHub Release 双源，支持多架构切换与 SHA256/证书签名校验。">
   <section class="wrap section download-head">
     <div>
-      <p class="eyebrow">Download</p>
-      <h1>下载 BUCT One</h1>
-      <p class="lead">提供 Cloudflare R2（推荐）与 GitHub 双通道安装包下载。每次正式版发布后自动构建更新版本号、大小、SHA256 与本版更新说明。</p>
+      <p class="eyebrow" data-reveal>Download</p>
+      <h1 data-reveal>下载 BUCT One</h1>
+      <p class="lead" data-reveal>提供 Cloudflare R2（推荐）与 GitHub 双通道安装包下载。支持按设备架构切换，每次正式版发布后自动构建更新版本号、大小、SHA256 与本版更新说明。</p>
       <ReleasePanel />
-      <div class="cap-field requirements">
+      <div class="cap-field requirements" data-reveal>
         <span class="label">系统要求</span>
         <span>Android 7.0+（API 24）</span>
         <span>包名 com.buct.one</span>
-        <span>推荐 arm64-v8a · 另有 armeabi-v7a / universal</span>
+        <span>推荐 arm64-v8a · 支持 armeabi-v7a / universal</span>
       </div>
     </div>
   </section>
 
   <section class="wrap section">
-    <div class="section-head"><h2>三步安装</h2></div>
+    <div class="section-head" data-reveal><h2>三步安装</h2></div>
     <div class="grid grid-3">
-      <GlassCard accent={1} title="1 · 下载 APK"><p>点击上方「下载 APK」或前往 GitHub Release，获取安装包。</p></GlassCard>
-      <GlassCard accent={3} title="2 · 允许安装"><p>首次安装需允许「安装未知应用」权限，按系统提示授权一次即可。</p></GlassCard>
-      <GlassCard accent={5} title="3 · 登录使用"><p>打开 App，用学校统一身份认证登录，课表与作业自动同步。</p></GlassCard>
+      <GlassCard accent={1} title="1 · 选择架构并下载"><p>绝大多数手机保持默认 arm64-v8a，点击「通过 Cloudflare R2 下载」即可高速获取。</p></GlassCard>
+      <GlassCard accent={3} title="2 · 核对校验并安装"><p>可比对 SHA-256 与签名指纹，首次安装按系统提示允许「安装未知应用」即可。</p></GlassCard>
+      <GlassCard accent={5} title="3 · 登录即自动同步"><p>使用学校统一身份认证原生登录，课表（含官方校历校准）、作业与各业务域自动就绪。</p></GlassCard>
     </div>
   </section>
 
   <section class="wrap section">
-    <div class="glass-content cap-card faq-mini">
+    <div class="glass-content cap-card spotlight-card faq-mini" data-spotlight data-reveal>
       <h3>常见问题</h3>
       <ul>
-        <li><strong>为什么不在应用商店？</strong> 校园工具类应用上架成本高，开源直发便于快速迭代与监督。</li>
-        <li><strong>安全吗？</strong> 学号密码绝不落盘，凭据 Keystore 加密，零第三方上报；可用 SHA256 校验安装包。</li>
-        <li><strong>和学校官方 App 什么关系？</strong> 本项目为学生开源作品，非学校官方应用。</li>
+        <li><strong>为什么不在应用商店？</strong> 校园工具类应用上架维护成本高，开源直发便于快速迭代与代码监督。</li>
+        <li><strong>安全吗？</strong> 明文绝不落盘，可选由 Android Keystore（AES-256-GCM）加密保管凭据并排除云备份，零第三方商业 SDK；可用 SHA256 与证书指纹校验。</li>
+        <li><strong>后续如何升级？</strong> 正式版统一证书签名，后续在 App 内「我的 → 应用与支持 → 检查更新」即可自动匹配架构并校验覆盖升级。</li>
+        <li><strong>和学校官方 App 什么关系？</strong> 本项目为北化学生开源作品，非学校官方应用。</li>
       </ul>
-      <a href="/about#faq" class="label">更多 FAQ →</a>
+      <a href="/about#faq" class="label">更多 FAQ 与隐私架构 →</a>
     </div>
   </section>
 </Base>
 <style>
   .download-head { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: start; }
-  .download-head > div { display: grid; gap: 16px; }
+  .download-head > div { display: grid; gap: 16px; min-width: 0; }
   .requirements { flex-wrap: wrap; gap: 12px; color: var(--on-glass-variant); font-size: 14px; }
   .faq-mini { display: grid; gap: 10px; }
   .faq-mini ul { padding-left: 20px; display: grid; gap: 8px; }

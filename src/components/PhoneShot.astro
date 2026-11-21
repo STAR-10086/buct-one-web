@@ -1,11 +1,32 @@
 ---
-interface Props { id: string; label: string; }
-const { id, label } = Astro.props;
+interface Props {
+  id: string;
+  label: string;
+  zoomable?: boolean;
+  tilt?: boolean;
+  reveal?: boolean;
+  eager?: boolean;
+}
+const { id, label, zoomable = true, tilt = false, reveal = true, eager = false } = Astro.props;
 ---
-<figure class="phone-shot" data-shot={id}>
-  <div class="phone-frame glass-content">
+<figure
+  class={['phone-shot', zoomable ? 'is-zoomable' : ''].filter(Boolean).join(' ')}
+  data-shot={id}
+  data-shot-label={label}
+  data-shot-zoom={zoomable ? '' : undefined}
+  data-reveal={reveal ? '' : undefined}
+>
+  <div class="phone-frame glass-content" data-tilt={tilt ? '' : undefined}>
     <div class="phone-notch"></div>
-    <img class="phone-img" src={'/shots/shot-' + id + '.webp'} alt={label} width="270" height="585" loading="lazy" onerror="this.remove()" />
+    <img
+      class="phone-img"
+      src={'/shots/shot-' + id + '.webp'}
+      alt={label}
+      width="270"
+      height="585"
+      loading={eager ? 'eager' : 'lazy'}
+      onerror="this.remove()"
+    />
     <svg class="phone-placeholder" viewBox="0 0 270 585" role="img" aria-label={label + '（截图待提供）'}>
       <rect x="0" y="0" width="270" height="585" rx="24" fill="var(--surface)" />
       <rect x="20" y="28" width="150" height="14" rx="7" fill="var(--outline)" />
@@ -26,15 +47,41 @@ const { id, label } = Astro.props;
       <circle cx="205" cy="542" r="10" fill="var(--outline)" />
       <text x="135" y="320" text-anchor="middle" font-size="13" fill="var(--text-variant)" font-family="sans-serif">截图待提供</text>
     </svg>
+    {zoomable && <span class="shot-zoom-tip" aria-hidden="true">点击放大</span>}
   </div>
   <figcaption class="label">{label}</figcaption>
 </figure>
 <style>
   .phone-shot { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .phone-frame { position: relative; width: min(270px, 72vw); padding: 10px; border-radius: 44px; border: 8px solid #1d1d1f; box-shadow: var(--dock-shadow); }
+  .phone-shot.is-zoomable { cursor: zoom-in; }
+  .phone-shot.is-zoomable:focus-visible { outline-offset: 6px; border-radius: 44px; }
+  .phone-frame {
+    position: relative; width: min(270px, 72vw); padding: 10px;
+    border-radius: 44px; border: 8px solid #1d1d1f; box-shadow: var(--dock-shadow);
+    transform-style: preserve-3d;
+    transition: transform 280ms var(--ease-emphasized), box-shadow 280ms var(--ease-standard);
+  }
   :root[data-theme="dark"] .phone-frame { border-color: #000; }
+  @media (hover: hover) and (pointer: fine) {
+    .phone-shot.is-zoomable:hover .phone-frame {
+      transform: translateY(-5px) scale(1.015);
+      box-shadow: 0 18px 38px rgba(3, 23, 57, .20);
+    }
+    :root[data-theme="dark"] .phone-shot.is-zoomable:hover .phone-frame {
+      box-shadow: 0 20px 44px rgba(0, 0, 0, .55);
+    }
+    .phone-shot.is-zoomable:hover .shot-zoom-tip { opacity: 1; transform: translate(-50%, 0); }
+  }
   .phone-notch { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); width: 72px; height: 16px; border-radius: 8px; background: #1d1d1f; z-index: 2; }
   .phone-img { position: absolute; inset: 10px; width: calc(100% - 20px); height: calc(100% - 20px); object-fit: cover; border-radius: 34px; z-index: 1; }
   .phone-placeholder { width: 100%; height: auto; border-radius: 34px; }
+  .shot-zoom-tip {
+    position: absolute; left: 50%; bottom: 18px; z-index: 3;
+    transform: translate(-50%, 6px); opacity: 0; pointer-events: none;
+    padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+    color: #fff; background: rgba(18, 22, 30, .72);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    transition: opacity 200ms var(--ease-standard), transform 220ms var(--ease-emphasized);
+  }
   figcaption { color: var(--text-variant); }
 </style>

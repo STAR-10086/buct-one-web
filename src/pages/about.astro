@@ -1,15 +1,47 @@
 ---
 import Base from '../layouts/Base.astro';
+import GlassCard from '../components/GlassCard.astro';
+
 const faqs = [
   ['支持哪些学校？', '面向北京化工大学（BUCT），接入 sidportal 统一身份认证与教务（含教务消息）、北化在线、i北化（官方校历/校内资讯/图书在借）、第二课堂、实践教学、体测与体育、校园邮箱及校园一卡通。'],
   ['本科与研究生教务有何区别？', '在「我的 → 教务系统（本科 / 研究生）」切换本科（jwglxt）或研究生（gmis），课表、成绩与培养方案分别适配。'],
   ['第二课堂为何需要校园网或 VPN？', '第二课堂域名仅限校内/VPN 访问，App 内置智能混合 DNS（BuctDns）优先直连校内 DNS 202.4.130.100 并支持故障回退。'],
-  ['忘记密码怎么办？', 'App 不存储明文密码，请通过学校统一身份认证门户找回；App 内凭据由 Android Keystore（AES-256-GCM）独立别名加密保管。'],
-  ['数据多久同步一次？', '本地优先：同步失败绝不清空旧缓存；北化在线采用两阶段后台静默同步，各模块均支持工作台一键刷新与静默 SSO 续期。'],
-  ['抢课会不会给教务造成压力？', '定时队列按合理并发与间隔请求，避免对教务系统造成冲击。'],
+  ['忘记密码怎么办？', 'App 绝不存储明文密码，请通过学校统一身份认证门户找回；若开启本机记住凭据，密文由 Android Keystore（AES-256-GCM）独立别名加密保管且排除云备份，认证失败或退出登录即刻擦除。'],
+  ['数据多久同步一次？', '本地优先：同步失败绝不清空旧缓存；北化在线采用两阶段后台静默同步，各模块均支持工作台一键刷新与跨模块 SsoSilentRelogin 静默续期。'],
+  ['如何更新 App？', '正式版接入 update.buct.one，支持冷启动检测与「我的 → 应用与支持 → 检查更新」手动检查；按设备 ABI 自动匹配包并执行 SHA-256 与正式签名双重校验。'],
+  ['匿名使用统计收集什么？', '仅通过自托管 Umami（stats.buct.one）与本地随机 UUIDv4 统计每日启动心跳与模块热度，绝不采集学号、姓名、Cookie 或硬件指纹，可在「我的 → 数据与安全」随时关闭。'],
+  ['抢课会不会给教务造成压力？', '定时队列按合理并发与间隔请求，不做高风险全自动刷单或代打卡操作，避免对教务系统造成冲击。'],
   ['如何贡献代码？', '欢迎在 GitHub 提 Issue 与 PR；项目遵循 GPL-3.0，贡献即视为同意该许可。'],
   ['GPL-3.0 对我意味着什么？', '你可以自由使用、学习与修改源码；分发衍生作品需同样以 GPL-3.0 开源。'],
 ];
+
+const roadmap = [
+  {
+    accent: 3,
+    badge: '规划中',
+    title: '北化在线课件资料',
+    desc: '补齐课程「教学资源 / 课件目录」只读浏览、目录展开与原生下载打开（复用 FileProvider）。',
+  },
+  {
+    accent: 1,
+    badge: '规划中',
+    title: '轻量智能提醒与小组件扩展',
+    desc: '基于本地缓存提供作业 DDL、考试倒计时、调停课、图书到期与校园卡低余额提醒；扩展 DDL / 考试倒计时与余额桌面小组件。',
+  },
+  {
+    accent: 2,
+    badge: '调研 / 规划中',
+    title: '校园网状态与班车时刻表',
+    desc: '对接 tree.buct.edu.cn 深澜认证与流量余额查询；内置东区 ↔ 昌平通勤班车时刻表（区分工作日/周末/寒暑假与下一班倒计时）。',
+  },
+  {
+    accent: 7,
+    badge: '规划中',
+    title: '学业 GPA 试算与一卡通洞察',
+    desc: '结合培养方案支持目标 GPA 试算与学分缺口统计；纯 Compose Canvas 绘制月度消费趋势与类别分布，严守 APK 体积预算。',
+  },
+];
+
 const credits = [
   ['zhengfang-apk', 'GPL-3.0', '液态玻璃界面体系、胶囊导航、教务解析与小组件架构'],
   ['beihua-kebiao', 'GPL-3.0', '北化原生 sidportal 认证、BuctTlsTrustManager 信任链与教务适配'],
@@ -20,9 +52,9 @@ const credits = [
   ['shuding/liquid-glass · xiaofangstudio/liquid-glass-web', 'MIT', '官网折射引擎算法与交互动效参考'],
 ];
 ---
-<Base title="关于 · BUCT One" description="关于 BUCT One：隐私架构、常见问题、上游致谢与联系方式。">
+<Base title="关于 · BUCT One" description="关于 BUCT One：隐私架构、演进路线规划、常见问题、上游致谢与联系方式。">
   <section class="wrap section about-head">
-    <div>
+    <div data-reveal>
       <p class="eyebrow">About</p>
       <h1>关于 BUCT One</h1>
       <p class="lead">BUCT One · 北化一站是北化学生开发维护的开源校园工作台，以原生液态玻璃界面串起校内各系统。本项目非学校官方应用。</p>
@@ -30,8 +62,8 @@ const credits = [
   </section>
 
   <section class="wrap section" id="privacy">
-    <div class="section-head"><h2>隐私架构</h2></div>
-    <div class="glass-content cap-card">
+    <div class="section-head" data-reveal><h2>隐私架构</h2></div>
+    <div class="glass-content cap-card spotlight-card" data-spotlight data-reveal>
       <pre class="mono arch">sidportal 原生认证 ──┬─→ 教务（课表 / 成绩 / 培养方案 / 考试 / 选课 / 教务消息）
                     ├─→ i北化（官方校历自动校准 / 校内四栏资讯 / 图书馆在借）
                     ├─→ 北化在线（两阶段同步作业 / 测验 / 附件）
@@ -44,18 +76,32 @@ const credits = [
    分域采集 → 版本化解析 → 原子落盘（失败不覆盖旧快照）→ 界面与小组件</pre>
       <ul class="privacy-points">
         <li>业务请求全程直连校方服务器，无第三方商业埋点 SDK（仅含自托管 Umami 零 PII 匿名统计，支持在设置中随时关闭）。</li>
-        <li>学号密码绝不写明文，内存 char[] 用后清零；各会话 Vault 各自独立 Keystore（AES-256-GCM）加密。</li>
-        <li>全网强制校方证书链（BuctTlsTrustManager），CI 静态禁止 trustAllCerts。</li>
-        <li>备份规则显式排除全部 Vault 文件；日志自动掩码学号、姓名与成绩。</li>
+        <li>明文绝不落盘，内存 char[] 用后清零；各会话凭据 Vault 各自采用独立 Android Keystore（AES-256-GCM）别名加密保管，认证失败或退出登录立即擦除。</li>
+        <li>全网强制校方证书链（BuctTlsTrustManager），CI 静态禁止 trustAllCerts 与放行任意 HostnameVerifier。</li>
+        <li>备份规则显式排除全部 Vault 文件防止云备份带出；日志自动掩码学号、姓名与成绩数值。</li>
       </ul>
     </div>
   </section>
 
+  <section class="wrap section" id="roadmap">
+    <div class="section-head" data-reveal>
+      <h2>演进路线</h2>
+      <a href="/changelog" class="label">查看已发布版本 →</a>
+    </div>
+    <div class="grid grid-2">
+      {roadmap.map((item) => (
+        <GlassCard accent={item.accent} title={item.title} badge={item.badge}>
+          <p>{item.desc}</p>
+        </GlassCard>
+      ))}
+    </div>
+  </section>
+
   <section class="wrap section" id="faq">
-    <div class="section-head"><h2>常见问题</h2></div>
+    <div class="section-head" data-reveal><h2>常见问题</h2></div>
     <div class="faq-list">
       {faqs.map(([q, a]) => (
-        <details class="glass-content cap-card faq-item">
+        <details class="glass-content cap-card spotlight-card faq-item" data-spotlight data-reveal>
           <summary>{q}</summary>
           <p>{a}</p>
         </details>
@@ -64,8 +110,8 @@ const credits = [
   </section>
 
   <section class="wrap section">
-    <div class="section-head"><h2>上游致谢</h2></div>
-    <div class="glass-content cap-card">
+    <div class="section-head" data-reveal><h2>上游致谢</h2></div>
+    <div class="glass-content cap-card spotlight-card" data-spotlight data-reveal>
       <ul class="credits">
         {credits.map(([name, lic, desc]) => (
           <li><strong>{name}</strong><span class="cap-chip">{lic}</span><span class="label">{desc}</span></li>
@@ -75,7 +121,7 @@ const credits = [
   </section>
 
   <section class="wrap section">
-    <div class="glass-content cap-card contact">
+    <div class="glass-content cap-card spotlight-card contact" data-spotlight data-reveal>
       <h3>联系与反馈</h3>
       <p class="lead">唯一反馈渠道为 GitHub Issues，不设邮箱以减小爬虫面。</p>
       <a class="btn btn-secondary" href="https://github.com/STAR-10086/buct-one/issues" target="_blank" rel="noopener">提交 Issue</a>
@@ -84,11 +130,12 @@ const credits = [
 </Base>
 <style>
   .about-head { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: center; }
+  .about-head > div { display: grid; gap: 10px; }
   .arch { font-size: 12px; line-height: 20px; overflow-x: auto; color: var(--on-glass); padding: 8px 0; }
   .privacy-points { padding-left: 20px; display: grid; gap: 6px; margin-top: 12px; }
   .privacy-points li { font-size: 14px; line-height: 20px; color: var(--on-glass-variant); }
   .faq-list { display: grid; gap: 12px; }
-  .faq-item summary { cursor: pointer; font-weight: 600; color: var(--on-glass); }
+  .faq-item summary { cursor: pointer; font-weight: 600; color: var(--on-glass); list-style-position: inside; }
   .faq-item p { margin-top: 8px; font-size: 14px; line-height: 20px; color: var(--on-glass-variant); }
   .credits { list-style: none; display: grid; gap: 10px; }
   .credits li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

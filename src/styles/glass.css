@@ -1,21 +1,42 @@
-/* 玻璃角色（GlassMaterial.kt 实值）+ 内容卡（ContentSurface）+ 降级链 */
+/* 玻璃角色（GlassMaterial.kt 实值）+ 内容卡（ContentSurface）+ 降级链 + 镜面高光 */
 .glass-nav, .glass-control, .glass-modal, .glass-content, .glass-interactive {
   position: relative;
   border: 1px solid var(--glass-border);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
-.glass-nav { background: var(--glass-nav); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: var(--dock-shadow), inset 0 1px 0 var(--glass-highlight); }
-.glass-control { background: var(--glass-control); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); box-shadow: inset 0 1px 0 var(--glass-highlight); }
-.glass-modal { background: var(--glass-modal); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border-radius: var(--radius-dialog); box-shadow: 0 8px 24px rgba(0,0,0,.24), inset 0 1px 0 var(--glass-highlight); }
-.glass-interactive { background: var(--glass-interactive); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.glass-nav {
+  background: var(--glass-nav);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  backdrop-filter: blur(14px) saturate(1.25);
+  box-shadow: var(--dock-shadow), inset 0 1px 0 var(--glass-highlight);
+}
+.glass-control {
+  background: var(--glass-control);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+}
+.glass-modal {
+  background: var(--glass-modal);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border-radius: var(--radius-dialog);
+  box-shadow: 0 8px 24px rgba(0,0,0,.24), inset 0 1px 0 var(--glass-highlight);
+}
+.glass-interactive {
+  background: var(--glass-interactive);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 .glass-content {
   background: var(--glass-content);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  backdrop-filter: blur(16px) saturate(1.25);
   border-radius: var(--radius-card);
   box-shadow: inset 0 1px 0 var(--card-topline);
   padding: var(--card-pad);
+  transition: transform 280ms var(--ease-emphasized), box-shadow 280ms var(--ease-standard), border-color 280ms var(--ease-standard), background-color 240ms var(--ease-standard);
 }
 .edge-ring::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
@@ -24,7 +45,24 @@
   -webkit-mask-composite: xor; mask-composite: exclude;
   pointer-events: none;
 }
-.is-scrolling .glass-content { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* 卡片跟随鼠标镜面高光与轻浮起（仅桌面悬停指针） */
+.spotlight-card { overflow: hidden; }
+.spotlight-card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), var(--spotlight-color), transparent 65%);
+  opacity: 0; transition: opacity 280ms var(--ease-standard);
+}
+.spotlight-card > * { position: relative; z-index: 1; }
+@media (hover: hover) and (pointer: fine) {
+  .spotlight-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--card-hover-border);
+    box-shadow: var(--card-hover-shadow);
+  }
+  .spotlight-card:hover::before { opacity: 1; }
+}
+
 :root[data-glass="solid"] .glass-nav,
 :root[data-glass="solid"] .glass-control,
 :root[data-glass="solid"] .glass-modal,
@@ -40,15 +78,30 @@
     background: var(--solid) !important;
   }
 }
+
+/* 可拖拽折射透镜 + 静止悬浮呼吸 + 实时高光 */
+@keyframes lens-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
+}
 .lens {
   position: absolute; border-radius: 999px; overflow: hidden;
   background: var(--glass-interactive);
-  box-shadow: 0 4px 8px rgba(0,0,0,.22), 0 -10px 25px inset rgba(0,0,0,.12);
+  box-shadow: 0 4px 12px rgba(0,0,0,.20), 0 -10px 25px inset rgba(0,0,0,.12), inset 0 1px 0 var(--glass-highlight);
   cursor: grab; touch-action: none; will-change: transform;
+  animation: lens-float 6.5s ease-in-out infinite;
 }
+.lens.lens-b { animation-delay: -3.2s; animation-duration: 7.5s; }
+.lens.is-dragging, .lens.has-moved { animation: none; }
 .lens:active { cursor: grabbing; }
 .lens .lit-glow {
   position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: radial-gradient(circle at var(--lx, 50%) var(--ly, 50%), rgba(255,255,255,.9) 0%, rgba(255,255,255,.25) 40%, transparent 70%);
-  mix-blend-mode: soft-light; opacity: 0; transition: opacity .25s;
+  background: radial-gradient(circle at var(--lx, 50%) var(--ly, 50%), rgba(255,255,255,.92) 0%, rgba(255,255,255,.28) 42%, transparent 72%);
+  mix-blend-mode: soft-light;
+  opacity: var(--glow-op, 0.28);
+  transition: opacity .22s var(--ease-standard);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lens { animation: none !important; }
+  .spotlight-card:hover { transform: none; }
 }

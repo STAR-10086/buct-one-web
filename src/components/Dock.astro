@@ -7,13 +7,20 @@ const items = [
   { href: '/changelog', label: '更新日志', icon: 'clock' },
   { href: '/about', label: '关于', icon: 'info' },
 ];
-const isCurrent = (href: string) => href === '/' ? path === '/' : path.startsWith(href);
+const isCurrent = (href: string) =>
+  href === '/' ? path === '/' : path === href || path.startsWith(href + '/');
 ---
-<header class="dock-wrap">
+<header class="dock-wrap" transition:persist="dock">
   <nav class="cap-dock glass-nav edge-ring" aria-label="主导航">
     <span class="cap-dock-indicator" data-dock-indicator></span>
     {items.map((it) => (
-      <a class="cap-dock-item" href={it.href} aria-current={isCurrent(it.href) ? 'page' : undefined} data-dock-item>
+      <a
+        class="cap-dock-item"
+        href={it.href}
+        aria-current={isCurrent(it.href) ? 'page' : undefined}
+        data-dock-item
+        data-nav-path={it.href}
+      >
         <Icon name={it.icon} /><span>{it.label}</span>
       </a>
     ))}
@@ -32,18 +39,84 @@ const isCurrent = (href: string) => href === '/' ? path === '/' : path.startsWit
 </style>
 <script>
   import { animateSpring } from '../lib/spring-physics';
-  function placeIndicator(animate: boolean) {
+
+  let lastX: number | null = null;
+  let lastW: number | null = null;
+  let stopX: (() => void) | null = null;
+  let stopW: (() => void) | null = null;
+
+  function syncActiveDockItem(): HTMLElement | null {
+    const nav = document.querySelector<HTMLElement>('.cap-dock');
+    if (!nav) return null;
+    const curPath = location.pathname.replace(/\/$/, '') || '/';
+    let active: HTMLElement | null = null;
+
+    nav.querySelectorAll<HTMLElement>('[data-nav-path]').forEach((item) => {
+      const href = item.dataset.navPath || '';
+      const match = href === '/' ? curPath === '/' : curPath === href || curPath.startsWith(href + '/');
+      if (match) {
+        item.setAttribute('aria-current', 'page');
+        active = item;
+      } else {
+        item.removeAttribute('aria-current');
+      }
+    });
+    return active;
+  }
+
+  function placeIndicator(animate: boolean): void {
     const nav = document.querySelector<HTMLElement>('.cap-dock');
     const ind = document.querySelector<HTMLElement>('[data-dock-indicator]');
-    const cur = nav?.querySelector<HTMLElement>('[aria-current="page"]') ?? nav?.querySelector<HTMLElement>('[data-dock-item]');
-    if (!nav || !ind || !cur) return;
-    const left = cur.offsetLeft, width = cur.offsetWidth;
-    ind.style.width = width + 'px';
-    if (animate) {
-      const from = nav.clientWidth / 2 - width / 2;
-      animateSpring(from, left, 'navSettle', (v) => { ind.style.left = v + 'px'; });
-    } else { ind.style.left = left + 'px'; }
+    const cur = syncActiveDockItem();
+    if (!nav || !ind || !cur) {
+      ind?.classList.remove('is-ready');
+      return;
+    }
+
+    const targetX = cur.offsetLeft;
+    const targetW = cur.offsetWidth;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    stopX?.();
+    stopW?.();
+    stopX = stopW = null;
+
+    if (!animate || reduce || lastX === null || lastW === null) {
+      ind.style.setProperty('--ind-x', `${targetX}px`);
+      ind.style.width = `${targetW}px`;
+      ind.classList.add('is-ready');
+      lastX = targetX;
+      lastW = targetW;
+      return;
+    }
+
+    const fromX = lastX;
+    const fromW = lastW;
+    ind.classList.add('is-ready');
+
+    if (Math.abs(fromX - targetX) < 0.5 && Math.abs(fromW - targetW) < 0.5) {
+      ind.style.setProperty('--ind-x', `${targetX}px`);
+      ind.style.width = `${targetW}px`;
+      return;
+    }
+
+    stopX = animateSpring(fromX, targetX, 'navSettle', (v) => {
+      lastX = v;
+      ind.style.setProperty('--ind-x', `${v.toFixed(2)}px`);
+    });
+    stopW = animateSpring(fromW, targetW, 'navSettle', (v) => {
+      lastW = v;
+      ind.style.width = `${Math.max(24, v).toFixed(2)}px`;
+    });
   }
-  placeIndicator(true);
-  addEventListener('resize', () => placeIndicator(false));
+
+  const w = window as unknown as { __buctDockBound?: boolean };
+  if (!w.__buctDockBound) {
+    w.__buctDockBound = true;
+    document.addEventListener('astro:page-load', () => {
+      placeIndicator(lastX !== null);
+    });
+    addEventListener('resize', () => placeIndicator(false));
+  }
+  placeIndicator(false);
 </script>

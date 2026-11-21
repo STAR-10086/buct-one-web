@@ -7,6 +7,7 @@ const cachePath = dataDir + 'changelog-cache.md';
 const fallbackPath = dataDir + 'changelog-fallback.md';
 const raw = readFileSync(existsSync(fallbackPath) ? fallbackPath : cachePath, 'utf-8');
 const chunks = raw.split(/^## /m).slice(1);
+let foundLatest = false;
 const versions = chunks.map((chunk) => {
   const nl = chunk.indexOf('\n');
   const header = chunk.slice(0, nl).trim();
@@ -14,22 +15,41 @@ const versions = chunks.map((chunk) => {
   const m = header.match(/\[([^\]]+)\]\s*(?:-\s*(.*))?/);
   const name = m ? m[1] : header;
   const date = m && m[2] ? m[2].trim() : '';
-  return { name, date, html: miniMarkdown(body), unreleased: name.toLowerCase() === 'unreleased' };
+  const unreleased = name.toLowerCase() === 'unreleased';
+  const isLatest = !unreleased && !foundLatest;
+  if (isLatest) foundLatest = true;
+  return {
+    id: 'v' + name.replace(/\./g, '-'),
+    name,
+    date,
+    html: miniMarkdown(body),
+    unreleased,
+    isLatest,
+  };
 });
 ---
 <Base title="更新日志 · BUCT One" description="BUCT One 全量版本更新日志：新增功能、优化与修复。">
   <section class="wrap section changelog-head">
-    <div>
+    <div data-reveal>
       <p class="eyebrow">Changelog</p>
       <h1>更新日志</h1>
       <p class="lead">面向用户的实质性功能新增、问题修复与架构演进，随每次正式版发布自动构建更新。</p>
     </div>
+    <nav class="version-jump" aria-label="版本快速跳转" data-reveal>
+      {versions.map((v) => (
+        <a class:list={['cap-chip', 'jump-chip', v.isLatest && 'is-latest']} href={'#' + v.id}>
+          {v.unreleased ? '开发中' : 'v' + v.name}
+        </a>
+      ))}
+      <a class="cap-chip jump-chip" href="/about#roadmap">后续规划 →</a>
+    </nav>
   </section>
   <section class="wrap section timeline">
     {versions.map((v) => (
-      <article class="glass-content cap-card version-card" id={'v' + v.name.replace(/\./g, '-')}>
+      <article class="glass-content cap-card spotlight-card version-card" id={v.id} data-spotlight data-reveal>
         <div class="version-head">
           <h3>{v.unreleased ? '开发中' : 'v' + v.name}</h3>
+          {v.isLatest && <span class="cap-chip latest-badge">当前最新</span>}
           {v.date && <span class="cap-chip">{v.date}</span>}
           {v.unreleased && <span class="cap-chip soon">未发布</span>}
         </div>
@@ -39,11 +59,17 @@ const versions = chunks.map((chunk) => {
   </section>
 </Base>
 <style is:global>
-  .changelog-head { display: grid; grid-template-columns: 1fr; gap: 12px; align-items: center; }
+  .changelog-head { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: center; }
+  .changelog-head > div { display: grid; gap: 10px; }
+  .version-jump { display: flex; flex-wrap: wrap; gap: 8px; }
+  .jump-chip { text-decoration: none; transition: transform var(--dur-fast) var(--ease-fast-out-slow-in), border-color var(--dur-fast); }
+  .jump-chip:hover { text-decoration: none; border-color: var(--card-hover-border); transform: translateY(-1px); color: var(--on-glass); }
+  .jump-chip.is-latest { background: var(--primary-container); color: var(--primary); border-color: transparent; font-weight: 600; }
   .timeline { display: grid; gap: 16px; }
-  .version-card { display: grid; gap: 10px; }
+  .version-card { display: grid; gap: 10px; scroll-margin-top: 104px; }
   .version-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .version-head h3 { color: var(--on-glass); }
+  .latest-badge { height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11px; background: var(--primary-container); color: var(--primary); border: 0; font-weight: 600; }
   .soon { height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11px; color: var(--warning); background: var(--warning-c); border: 0; }
   .md h3, .md h4 { font-size: 16px; margin: 10px 0 4px; color: var(--on-glass); }
   .md ul { padding-left: 20px; display: grid; gap: 4px; }

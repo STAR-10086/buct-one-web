@@ -41,7 +41,13 @@
   --block-9: #4E9F3D; --block-10: #D95757;
   --neu-light: #FFFFFF; --neu-dark: #D1D9E6;
   --neu-inset-bg: #E2E6EC; --neu-inset-dark: #BEC8D6; --neu-inset-light: #F5F9FC;
-  --canvas-glow: transparent; --canvas-shade: transparent;
+  --canvas-glow: rgba(10, 132, 255, 0.12); --canvas-shade: rgba(124, 92, 255, 0.06);
+  --orb-1: rgba(10, 132, 255, 0.22);
+  --orb-2: rgba(15, 157, 132, 0.17);
+  --orb-3: rgba(133, 90, 224, 0.16);
+  --card-hover-border: rgba(10, 132, 255, 0.28);
+  --card-hover-shadow: 0 12px 32px rgba(3, 23, 57, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  --spotlight-color: rgba(255, 255, 255, 0.52);
   --dock-shadow: 0 6px 18px rgba(3, 23, 57, .12);
   --page-pad: 20px; --section-gap: 20px; --card-pad: 16px;
   --dur-fast: 100ms; --dur-medium: 200ms; --dur-slow: 400ms; --dur-tab: 180ms;
@@ -76,5 +82,11 @@
   --card-topline: rgba(255, 255, 255, .10);
   --danger: #FFB4AB; --danger-c: #742A27;
   --canvas-glow: #263349; --canvas-shade: #05080E;
+  --orb-1: rgba(10, 132, 255, 0.28);
+  --orb-2: rgba(28, 143, 143, 0.22);
+  --orb-3: rgba(133, 90, 224, 0.24);
+  --card-hover-border: rgba(77, 163, 255, 0.34);
+  --card-hover-shadow: 0 16px 36px rgba(0, 0, 0, 0.44), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  --spotlight-color: rgba(136, 191, 255, 0.18);
   --dock-shadow: 0 6px 18px rgba(0, 0, 0, .40);
 }

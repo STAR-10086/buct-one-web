@@ -5,42 +5,181 @@ import Sha256Row from './Sha256Row.astro';
 import { miniMarkdown } from '../lib/release';
 
 const r = snapshot as any;
-const tag = r.tag || ('v' + r.version);
-const sizeText = r.sizeBytes > 0 ? (r.sizeBytes / 1048576).toFixed(1) + ' MB' : '—';
+const tag = r.tag || 'v' + r.version;
+const fallbackSizeText = r.sizeBytes > 0 ? (r.sizeBytes / 1048576).toFixed(2) + ' MB' : '—';
 const dateText = String(r.publishedAt || '').slice(0, 10);
+const rawMd = String(r.changelogMd || '');
 
-// 硬编码 R2 latest 固定短链，零 R2 元数据查询开销
-const r2LatestApkUrl = 'https://dl.buct.one/apk/latest/arm64-v8a/buct-one-latest.apk';
-const githubApkUrl = `https://github.com/STAR-10086/buct-one/releases/download/${tag}/buct-one-${tag}-arm64-v8a.apk`;
+interface AbiMeta {
+  id: 'arm64-v8a' | 'armeabi-v7a' | 'universal';
+  label: string;
+  desc: string;
+  sizeText: string;
+  sha256: string;
+  r2Url: string;
+  ghUrl: string;
+}
+
+function parseTableMeta(md: string, arch: string): { sizeText?: string; sha256?: string } {
+  const escaped = arch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const rowRe = new RegExp(`^\\|[^\\n]*${escaped}\\.apk[^\\n]*\\|$`, 'm');
+  const m = md.match(rowRe);
+  if (!m) return {};
+  const cols = m[0]
+    .split('|')
+    .map((c) => c.trim())
+    .filter(Boolean);
+  // 表格列顺序：安装包 | 适用设备 / 用途 | 文件大小 | SHA-256
+  const sizeCol = cols[2] || '';
+  const shaCol = (cols[3] || '').replace(/`/g, '').trim();
+  const sizeMatch = sizeCol.match(/([\d.]+\s*MB)/i);
+  const shaMatch = shaCol.match(/[a-f0-9]{64}/i);
+  return {
+    sizeText: sizeMatch ? sizeMatch[1] : undefined,
+    sha256: shaMatch ? shaMatch[0].toLowerCase() : undefined,
+  };
+}
+
+const abis: AbiMeta[] = (
+  [
+    {
+      id: 'arm64-v8a',
+      label: 'arm64-v8a（推荐）',
+      desc: '绝大多数近几年的 64 位 Android 手机',
+    },
+    {
+      id: 'armeabi-v7a',
+      label: 'armeabi-v7a',
+      desc: '较老的 32 位 ARM Android 设备',
+    },
+    {
+      id: 'universal',
+      label: 'universal',
+      desc: '全架构通用包（不确定架构或模拟器使用）',
+    },
+  ] as const
+).map((item) => {
+  const parsed = parseTableMeta(rawMd, item.id);
+  const fallbackSha = item.id === 'arm64-v8a' ? String(r.sha256 || '') : '';
+  const fallbackSize = item.id === 'arm64-v8a' ? fallbackSizeText : '—';
+  return {
+    id: item.id,
+    label: item.label,
+    desc: item.desc,
+    sizeText: parsed.sizeText || fallbackSize,
+    sha256: parsed.sha256 || fallbackSha,
+    r2Url: `https://dl.buct.one/apk/latest/${item.id}/buct-one-latest.apk`,
+    ghUrl: `https://github.com/STAR-10086/buct-one/releases/download/${tag}/buct-one-${tag}-${item.id}.apk`,
+  };
+});
+
+const defaultAbi = abis[0];
 const githubReleaseUrl = r.githubReleaseUrl || `https://github.com/STAR-10086/buct-one/releases/tag/${tag}`;
-const changelogHtml = r.changelogMd ? miniMarkdown(r.changelogMd) : '';
+
+const certDnMatch = rawMd.match(/正式签名证书主体\*\*：`([^`]+)`/);
+const certShaMatch = rawMd.match(/正式签名证书 SHA-256 指纹\*\*：`([a-f0-9]{64})`/i);
+const versionCodeMatch = rawMd.match(/`versionCode\s*=\s*(\d+)`/);
+const certDn = certDnMatch ? certDnMatch[1] : '';
+const certSha = certShaMatch ? certShaMatch[1].toLowerCase() : '';
+const versionCode = versionCodeMatch ? versionCodeMatch[1] : '';
+
+// 剔除重复的“安装包下载建议”表格与末尾“产物与签名校验信息”，保留提示与变更正文
+function trimReleaseNotes(md: string): string {
+  if (!md) return '';
+  let out = md.replace(/^##\s+BUCT One[^\n]*\n+/m, '');
+  out = out.replace(/###\s*安装包下载建议[\s\S]*?(?=###\s*更新日志)/m, '');
+  out = out.replace(/###\s*更新日志\s*\n+/m, '');
+  out = out.replace(/###\s*产物与签名校验信息[\s\S]*$/m, '');
+  return out.trim() || md;
+}
+
+const changelogHtml = rawMd ? miniMarkdown(trimReleaseNotes(rawMd)) : '';
 ---
 <section class="release">
-  <div class="cap-chip version-chip">
-    <strong data-rel="version">{'v' + r.version}</strong>
-    <span data-rel="date">{dateText}</span>
-    <span data-rel="size">{sizeText}</span>
-    <span class="cap-chip badge">最新正式版</span>
+  <div class="release-top" data-reveal>
+    <div class="cap-chip version-chip">
+      <strong data-rel="version">{'v' + r.version}</strong>
+      {versionCode && <span class="label">build {versionCode}</span>}
+      <span data-rel="date">{dateText}</span>
+      <span data-rel="size">{defaultAbi.sizeText}</span>
+      <span class="cap-chip badge">最新正式版</span>
+    </div>
+
+    <div class="abi-bar">
+      <div class="cap-segment" role="radiogroup" aria-label="选择设备架构" data-abi-seg>
+        <span class="cap-segment-indicator" data-seg-indicator></span>
+        {abis.map((abi, i) => (
+          <button
+            type="button"
+            role="radio"
+            aria-checked={i === 0 ? 'true' : 'false'}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+            data-abi-btn={abi.id}
+            data-abi-size={abi.sizeText}
+            data-abi-sha={abi.sha256}
+            data-abi-r2={abi.r2Url}
+            data-abi-gh={abi.ghUrl}
+            data-abi-desc={abi.desc}
+          >
+            {abi.label}
+          </button>
+        ))}
+      </div>
+      <span class="label abi-desc" data-rel="abi-desc">{defaultAbi.desc}</span>
+    </div>
   </div>
+
   <div class="grid grid-2 sources">
-    <article class="glass-content cap-card source-card">
+    <article class="glass-content cap-card source-card spotlight-card" data-spotlight data-reveal>
       <h3>Cloudflare R2 下载 <span class="cap-chip soon">推荐</span></h3>
-      <p>国内与校园网高速直连，固定拉取最新正式版安装包（arm64-v8a）。</p>
-      <a class="btn btn-primary btn-lg" href={r2LatestApkUrl} data-jelly>
+      <p>国内与校园网高速直连，固定拉取最新正式版安装包（<code class="mono" data-rel="abi-tag">arm64-v8a</code>）。</p>
+      <a class="btn btn-primary btn-lg" href={defaultAbi.r2Url} data-rel="r2-btn" data-jelly>
         <Icon name="download" /> 通过 Cloudflare R2 下载
       </a>
     </article>
-    <article class="glass-content cap-card source-card">
+    <article class="glass-content cap-card source-card spotlight-card" data-spotlight data-reveal>
       <h3>GitHub 下载</h3>
-      <p>从 GitHub Release 源下载当前版本安装包（<a href={githubReleaseUrl} target="_blank" rel="noopener" class="release-link">查看其它架构与历史版本 →</a>）。</p>
-      <a class="btn btn-secondary btn-lg" href={githubApkUrl} target="_blank" rel="noopener">
+      <p>从 GitHub Release 源下载当前版本安装包（<a href={githubReleaseUrl} target="_blank" rel="noopener" class="release-link">查看全部附件与历史版本 →</a>）。</p>
+      <a class="btn btn-secondary btn-lg" href={defaultAbi.ghUrl} data-rel="gh-btn" target="_blank" rel="noopener" data-jelly>
         <Icon name="github" /> 通过 GitHub 下载
       </a>
     </article>
   </div>
-  <Sha256Row sha={r.sha256} />
+
+  <div data-reveal>
+    <Sha256Row sha={defaultAbi.sha256} />
+  </div>
+
+  {(certDn || certSha) && (
+    <div class="glass-content cap-card cert-box spotlight-card" data-spotlight data-reveal>
+      <div class="cert-head">
+        <strong>正式发布签名证书校验</strong>
+        <span class="cap-chip">包名 com.buct.one</span>
+      </div>
+      <div class="cert-meta">
+        {certDn && <span class="label">主体：<code class="mono">{certDn}</code></span>}
+        <span class="label">App 内「我的 → 应用与支持 → 检查更新」会自动执行 SHA-256 与签名双重校验。</span>
+      </div>
+      {certSha && (
+        <div class="cap-field cert-sha">
+          <span class="label">证书指纹</span>
+          <code class="mono sha-value">{certSha}</code>
+          <button
+            class="cap-icondot"
+            type="button"
+            data-copy-text={certSha}
+            data-copy-label="签名指纹"
+            aria-label="复制正式签名证书 SHA-256 指纹"
+          >
+            <span><Icon name="copy" /></span>
+          </button>
+        </div>
+      )}
+    </div>
+  )}
+
   {changelogHtml && (
-    <div class="glass-content cap-card changelog-preview">
+    <div class="glass-content cap-card changelog-preview" data-reveal>
       <h4>本版更新</h4>
       <div class="md" set:html={changelogHtml} />
       <a href="/changelog" class="label">查看完整更新日志 →</a>
@@ -49,16 +188,26 @@ const changelogHtml = r.changelogMd ? miniMarkdown(r.changelogMd) : '';
 </section>
 <style>
   .release { display: grid; gap: 16px; min-width: 0; max-width: 100%; }
+  .release-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
   .version-chip { height: auto; min-height: 36px; flex-wrap: wrap; padding: 6px 12px; gap: 10px; color: var(--on-glass); }
   .version-chip strong { font-size: 14px; }
   .badge { height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11px; background: var(--primary-container); color: var(--primary); border: 0; }
+  .soon { height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11px; color: var(--warning); background: var(--warning-c); border: 0; }
+  .abi-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; max-width: 100%; min-width: 0; }
+  .abi-desc { color: var(--text-variant); }
   .source-card { display: grid; gap: 10px; align-content: start; min-width: 0; }
-  .changelog-preview { min-width: 0; }
-  .source-card h3 { display: flex; align-items: center; gap: 8px; color: var(--on-glass); }
+  .changelog-preview { min-width: 0; display: grid; gap: 10px; }
+  .source-card h3 { display: flex; align-items: center; gap: 8px; color: var(--on-glass); flex-wrap: wrap; }
   .source-card p { font-size: 14px; color: var(--on-glass-variant); }
   .release-link { color: var(--primary); text-decoration: none; }
   .release-link:hover { text-decoration: underline; }
-  .changelog-preview { display: grid; gap: 10px; }
+  .cert-box { display: grid; gap: 10px; min-width: 0; }
+  .cert-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; color: var(--on-glass); }
+  .cert-head .cap-chip { height: 26px; padding: 0 10px; font-size: 11px; }
+  .cert-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; color: var(--on-glass-variant); }
+  .cert-meta code { font-size: 12px; color: var(--on-glass); }
+  .cert-sha { flex-wrap: wrap; }
+  .cert-sha .sha-value { flex: 1; min-width: 0; font-size: 12px; word-break: break-all; color: var(--on-glass); }
   .md :global(h3), .md :global(h4) { font-size: 16px; margin: 8px 0 4px; color: var(--on-glass); }
   .md :global(ul) { padding-left: 20px; display: grid; gap: 4px; }
   .md :global(li), .md :global(p) { font-size: 14px; line-height: 20px; color: var(--on-glass-variant); }
@@ -69,5 +218,77 @@ const changelogHtml = r.changelogMd ? miniMarkdown(r.changelogMd) : '';
 </style>
 <script>
   import { initCopySha } from '../lib/release';
-  initCopySha();
+
+  function initAbiSwitch() {
+    initCopySha();
+    const seg = document.querySelector<HTMLElement>('[data-abi-seg]');
+    if (!seg) return;
+    const ind = seg.querySelector<HTMLElement>('[data-seg-indicator]');
+    const btns = Array.from(seg.querySelectorAll<HTMLButtonElement>('[data-abi-btn]'));
+    if (!ind || !btns.length) return;
+
+    const placeSeg = (btn: HTMLButtonElement) => {
+      ind.style.width = `${btn.offsetWidth}px`;
+      ind.style.setProperty('--seg-x', `${btn.offsetLeft}px`);
+    };
+
+    const selectBtn = (btn: HTMLButtonElement) => {
+      btns.forEach((b) => {
+        const active = b === btn;
+        b.setAttribute('aria-pressed', active ? 'true' : 'false');
+        b.setAttribute('aria-checked', active ? 'true' : 'false');
+      });
+      placeSeg(btn);
+
+      const arch = btn.dataset.abiBtn || 'arm64-v8a';
+      const size = btn.dataset.abiSize || '—';
+      const sha = btn.dataset.abiSha || '';
+      const r2 = btn.dataset.abiR2 || '';
+      const gh = btn.dataset.abiGh || '';
+      const desc = btn.dataset.abiDesc || '';
+
+      const sizeEl = document.querySelector<HTMLElement>('[data-rel="size"]');
+      const descEl = document.querySelector<HTMLElement>('[data-rel="abi-desc"]');
+      const tagEl = document.querySelector<HTMLElement>('[data-rel="abi-tag"]');
+      const shaEl = document.querySelector<HTMLElement>('[data-rel="sha256"]');
+      const shaRow = document.querySelector<HTMLElement>('[data-rel="sha-row"]');
+      const r2Btn = document.querySelector<HTMLAnchorElement>('[data-rel="r2-btn"]');
+      const ghBtn = document.querySelector<HTMLAnchorElement>('[data-rel="gh-btn"]');
+
+      if (sizeEl) sizeEl.textContent = size;
+      if (descEl) descEl.textContent = desc;
+      if (tagEl) tagEl.textContent = arch;
+      if (shaEl) shaEl.textContent = sha || '未提供';
+      if (shaRow) shaRow.hidden = !sha;
+      if (r2Btn && r2) r2Btn.href = r2;
+      if (ghBtn && gh) ghBtn.href = gh;
+    };
+
+    const active = btns.find((b) => b.getAttribute('aria-pressed') === 'true') || btns[0];
+    requestAnimationFrame(() => placeSeg(active));
+
+    if (seg.dataset.segBound !== '1') {
+      seg.dataset.segBound = '1';
+      btns.forEach((btn) => {
+        btn.addEventListener('click', () => selectBtn(btn));
+      });
+    }
+  }
+
+  function syncSegOnResize() {
+    const seg = document.querySelector<HTMLElement>('[data-abi-seg]');
+    const ind = seg?.querySelector<HTMLElement>('[data-seg-indicator]');
+    const cur = seg?.querySelector<HTMLButtonElement>('[data-abi-btn][aria-pressed="true"]');
+    if (!ind || !cur) return;
+    ind.style.width = `${cur.offsetWidth}px`;
+    ind.style.setProperty('--seg-x', `${cur.offsetLeft}px`);
+  }
+
+  const w = window as unknown as { __buctAbiBound?: boolean };
+  if (!w.__buctAbiBound) {
+    w.__buctAbiBound = true;
+    document.addEventListener('astro:page-load', initAbiSwitch);
+    addEventListener('resize', syncSegOnResize);
+  }
+  initAbiSwitch();
 </script>
