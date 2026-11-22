@@ -2,6 +2,22 @@
 
 所有面向用户的实质性功能新增、问题修复与架构演进记录如下，版本格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [Unreleased]
+
+### 新增
+- **校内受限域直连优先 WebVPN（`w.buct.edu.cn`）自动降级与 2FA 认证**：
+  - 针对仅限校内网访问的 6 个域名（第二课堂 `scs.buct.edu.cn` / `eapi.buct.edu.cn`、校园卡 `ecard.buct.edu.cn`、研究生系统 `gmis.buct.edu.cn`、i北化 `i.buct.edu.cn` / `mnews.buct.edu.cn`）实现 `BuctWebVpn`（Wengine AES-128-CFB URL 编解码 + `BuctWebVpnInterceptor` / `BuctWebVpnNetworkInterceptor`）；校外可直连域名（`jwglxt`、`course`、`tygl`、`sjcx`、`mail`、`sidportal`）全程保持直连不走 WebVPN；
+  - 按域名独立维护 3s 直连优先探测（校园网 Wi-Fi 下直接直连），校外遇到 DNS 不可达、连接超时或校方防火墙 403/VPN 提示页时自动通过 `sidportal` 换取并持久化 `wengine_vpn_ticketw_buct_edu_cn`（存入 `SidPortalSessionVault` Keystore 加密存储）；
+  - 支持原生 `BuctSsoLoginManager.loginWebVpn()` 短信二次验证（2FA）与网页认证双通道激活 WebVPN 票据。
+
+### 优化与修复
+- **统一全端 `sidportal` 请求 User-Agent 并加固根凭证存储**：统一 7 个 SSO 子模块与 `BuctWebVpn` 访问 `sidportal.buct.edu.cn` 时的 `User-Agent`，确保一次登录签发的 `SOURCEID_TGC` 跨模块免密复用；`SidPortalSessionVault` 增加 `SOURCEID_TGC=` 校验守卫，防止未完成认证或 2FA 中间态的 `SESSION` 覆盖有效根凭证；各子模块在认证页缺失 `execution`/`croypto` 时自动清 Cookie 重试并准确识别 `#sso-second` 二次验证状态。
+- **空闲教室与选课抢课改为独立 Activity**：工作台「空闲教室」与「选课抢课」入口独立为 `EmptyClassroomActivity` / `CourseSelectionActivity`（`GlassWindowHost`），获得系统级 Android 14+ 预测性返回手势动画。
+- **修复作业页顶栏「后台同步中…」副标题截断省略**。
+- **CI 构建提速与 `dev-latest` 滚动预发布**：非发版提交仅编译 `arm64-v8a` 并自动更新 GitHub Releases `dev-latest` 滚动测试包，移除预发行构建对 Cloudflare R2 的上传。
+
+---
+
 ## [0.3.3] - 2026-11-21
 
 ### 新增
@@ -48,7 +64,7 @@
 
 ### 新增
 - **体测与体育管理平台（`tygl.buct.edu.cn`）原生接入（`parserVersion: 1`）**：接入成绩查询与 2014《国家学生体质健康标准》离线算分模拟器，并新增工作台 `TYGL` 卡片与快捷入口。
-- **App 内自动更新与 Cloudflare R2 全球分发**：接入 `update.buct.one/update.json`（冷启动静默检测 + 手动检查更新），按设备 ABI 自动匹配安装包，支持 R2 / GitHub Release 双源下载与 SHA-256 + 正式签名双重校验。
+- **App 内自动更新与 Cloudflare R2 全球分发**：接入 `update.buctone.cc.cd/update.json`（冷启动静默检测 + 手动检查更新），按设备 ABI 自动匹配安装包，支持 R2 / GitHub Release 双源下载与 SHA-256 + 正式签名双重校验。
 - **工作台 2D 自由栅格自定义**：工作台升级为 4 列 × N 行真实 2D 坐标骨架，支持 `2×1` 大卡片、`1×1` 中卡片、`0.5×0.5` 迷你小卡片自由混排（可单列竖排并保留空白格位），长按弹簧拖拽与右上角箭头拖动/点按调尺寸；编辑态顶栏固定置于屏幕上方（纯图标撤回/重置 + 完整取消/保存），隐藏/缩放角标外置至边角，移除遮挡与半透灰边。
 - **选课与抢课集成**：工作台新增直达「选课抢课」入口，补全子页返回按钮并优化非选课开放阶段的教务提示。
 - **第二课堂（`scs.buct.edu.cn`）原生接入**：通过 `sidportal` CAS 换取 JWT `App-Token`，原生查看五育（德/智/体/美/劳）综测成绩、分类明细、自评窗口状态与二课活动记录。
