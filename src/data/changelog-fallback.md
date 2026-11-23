@@ -4,16 +4,26 @@
 
 ## [Unreleased]
 
+---
+
+## [0.3.4] - 2026-11-23
+
 ### 新增
 - **校内受限域直连优先 WebVPN（`w.buct.edu.cn`）自动降级与 2FA 认证**：
-  - 针对仅限校内网访问的 6 个域名（第二课堂 `scs.buct.edu.cn` / `eapi.buct.edu.cn`、校园卡 `ecard.buct.edu.cn`、研究生系统 `gmis.buct.edu.cn`、i北化 `i.buct.edu.cn` / `mnews.buct.edu.cn`）实现 `BuctWebVpn`（Wengine AES-128-CFB URL 编解码 + `BuctWebVpnInterceptor` / `BuctWebVpnNetworkInterceptor`）；校外可直连域名（`jwglxt`、`course`、`tygl`、`sjcx`、`mail`、`sidportal`）全程保持直连不走 WebVPN；
+  - 针对仅限校内网访问的 7 个域名（第二课堂 `scs.buct.edu.cn` / `eapi.buct.edu.cn`、校园卡 `ecard.buct.edu.cn`、研究生系统 `gmis.buct.edu.cn`、i北化 `i.buct.edu.cn` / `mnews.buct.edu.cn`、校园网网费 `tree.buct.edu.cn` 含 `:8800` 端口）实现 `BuctWebVpn`（Wengine AES-128-CFB URL 编解码 + `BuctWebVpnInterceptor` / `BuctWebVpnNetworkInterceptor`）；校外可直连域名（`jwglxt`、`course`、`tygl`、`sjcx`、`mail`、`sidportal`、`ele.buct.one`）全程保持直连不走 WebVPN；
   - 按域名独立维护 3s 直连优先探测（校园网 Wi-Fi 下直接直连），校外遇到 DNS 不可达、连接超时或校方防火墙 403/VPN 提示页时自动通过 `sidportal` 换取并持久化 `wengine_vpn_ticketw_buct_edu_cn`（存入 `SidPortalSessionVault` Keystore 加密存储）；
   - 支持原生 `BuctSsoLoginManager.loginWebVpn()` 短信二次验证（2FA）与网页认证双通道激活 WebVPN 票据。
+- **宿舍电费查询（`ele.buct.one`）**：
+  - 新增独立 `ElectricityActivity` 与工作台 `ELECTRICITY` 卡片（`parserVersion: 1`），内置全校昌平 / 东区 / 西区离线宿舍字典，支持东区同房间「照明 + 空调」双表一键绑定、低电量阈值提醒与 15 分钟边缘缓存；
+  - 接入随请求签名的 `X-Student-Id` 防滥用机制，首次使用展示学号共享说明并在查询/设置页顶部常驻提示（支持随时撤回授权并清除绑定），演示模式不触发上传。
+- **北化校园网网费与账单免密查询（`tree.buct.edu.cn`）**：
+  - 新增独立 `CampusNetActivity` 与工作台 `CAMPUS_NET` 卡片（`parserVersion: 2`），通过深澜网关与 `:8800` 自服务平台（直连优先 + 校外 WebVPN 自动降级，异常时支持一键跳转 WebVPN 认证）免密查询账户状态、本月消费、产品余额、电子钱包、周期已用流量、在线终端、缴费清单与月度结算账单，遵循「失败保留旧快照」铁律。
 
 ### 优化与修复
 - **统一全端 `sidportal` 请求 User-Agent 并加固根凭证存储**：统一 7 个 SSO 子模块与 `BuctWebVpn` 访问 `sidportal.buct.edu.cn` 时的 `User-Agent`，确保一次登录签发的 `SOURCEID_TGC` 跨模块免密复用；`SidPortalSessionVault` 增加 `SOURCEID_TGC=` 校验守卫，防止未完成认证或 2FA 中间态的 `SESSION` 覆盖有效根凭证；各子模块在认证页缺失 `execution`/`croypto` 时自动清 Cookie 重试并准确识别 `#sso-second` 二次验证状态。
 - **空闲教室与选课抢课改为独立 Activity**：工作台「空闲教室」与「选课抢课」入口独立为 `EmptyClassroomActivity` / `CourseSelectionActivity`（`GlassWindowHost`），获得系统级 Android 14+ 预测性返回手势动画。
 - **修复作业页顶栏「后台同步中…」副标题截断省略**。
+- **移除登录后旧版多校教务功能引导页**：统一身份认证登录后直接进入主工作台/课表界面。
 - **CI 构建提速与 `dev-latest` 滚动预发布**：非发版提交仅编译 `arm64-v8a` 并自动更新 GitHub Releases `dev-latest` 滚动测试包，移除预发行构建对 Cloudflare R2 的上传。
 
 ---
