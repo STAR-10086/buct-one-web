@@ -8,7 +8,7 @@ const faqs = [
   ['第二课堂、校园网为何需要校园网或 VPN？', '第二课堂、i北化、校园卡、校园网网费（tree.buct.edu.cn 含 :8800）与研究生教务等 7 个仅限校内的域名，App 内置混合 DNS（BuctDns）与直连优先 WebVPN 自动降级（w.buct.edu.cn）：校内直接连，校外受阻时自动切到 WebVPN 并支持原生短信二次验证。'],
   ['忘记密码怎么办？', 'App 绝不存储明文密码，请通过学校统一身份认证门户找回；若开启本机记住凭据，密文由 Android Keystore（AES-256-GCM）独立别名加密保管且排除云备份，认证失败或退出登录即刻擦除。'],
   ['数据多久同步一次？', '本地优先：同步失败绝不清空旧缓存；北化在线采用两阶段后台静默同步，各模块均支持工作台一键刷新与跨模块 SsoSilentRelogin 静默续期。'],
-  ['如何更新 App？', '正式版接入 update.buct.one，支持冷启动检测与「我的 → 应用与支持 → 检查更新」手动检查；按设备 ABI 自动匹配包并执行 SHA-256 与正式签名双重校验。'],
+  ['如何更新 App？', '正式版接入 update.buct.one，支持冷启动检测与「我的 → 应用与支持 → 检查更新」手动检查；按设备 ABI 自动匹配包并执行 SHA-256 与正式签名双重校验。重要版本通知与公告也可在「我的 → 官方公告」随时查看。'],
   ['匿名使用统计收集什么？', '仅通过自托管 Umami（stats.buct.one）与本地随机 UUIDv4 统计每日启动心跳与模块热度，绝不采集学号、姓名、Cookie 或硬件指纹，可在「我的 → 数据与安全」随时关闭。'],
   ['抢课会不会给教务造成压力？', '定时队列按合理并发与间隔请求，不做高风险全自动刷单或代打卡操作，避免对教务系统造成冲击。'],
   ['如何贡献代码？', '欢迎在 GitHub 提 Issue 与 PR；项目遵循 GPL-3.0，贡献即视为同意该许可。'],
@@ -18,15 +18,21 @@ const faqs = [
 const roadmap = [
   {
     accent: 3,
-    badge: '规划中',
-    title: '北化在线课件资料',
-    desc: '补齐课程「教学资源 / 课件目录」只读浏览、目录展开与原生下载打开（复用 FileProvider）。',
+    badge: '已在 v0.3.6 上线',
+    title: '北化在线独立课程与课件资料',
+    desc: '已上线独立课程中心：支持全部在读课程搜索、单元学习与课程资源目录浏览、端内在线预览与原生会话下载打开。',
   },
   {
     accent: 1,
-    badge: '已出规划 · v0.4.x',
-    title: '轻量智能提醒与消息推送',
-    desc: '优先落地纯本地双引擎提醒（AlarmManager 作业 DDL/图书到期闹钟 + WorkManager 低频检查调停课、新成绩与低余额），绝不上云存储个人凭据或引入商业推送 SDK。',
+    badge: '本地提醒与公告已上线',
+    title: '轻量智能提醒与官方公告',
+    desc: '已落地纯本地智能提醒、桌面倒计时组件与 notice.buct.one 官方公告通道，后续继续完善低频后台变更提醒，绝不上云存储个人凭据或引入商业推送 SDK。',
+  },
+  {
+    accent: 4,
+    badge: '开发中',
+    title: 'BUCT One iOS 版',
+    desc: '正在推进原生 iOS 客户端开发，逐步对齐课表、成绩、北化在线、宿舍电费等核心校园功能。',
   },
   {
     accent: 5,
@@ -72,7 +78,7 @@ const credits = [
     <div class="glass-content cap-card spotlight-card" data-spotlight data-reveal>
       <pre class="mono arch">sidportal 原生认证 ──┬─→ 教务（课表 / 成绩 / 培养方案 / 考试 / 选课 / 教务消息）
                     ├─→ i北化（官方校历自动校准 / 校内四栏资讯 / 图书馆在借）
-                    ├─→ 北化在线（两阶段同步作业 / 测验 / 附件）
+                    ├─→ 北化在线（独立课程 / 课件资源 / 作业 / 测验 / 附件）
                     ├─→ 实践教学（实验课表 / 抢讲座 / 创新学分）
                     ├─→ 第二课堂（五育综测 / 二课活动）
                     ├─→ 体测与体育（体测成绩 / 阳光跑 / 国标算分）
@@ -80,6 +86,7 @@ const credits = [
 校园一卡通 ───────────→ 独立会话（余额 / 流水 / Keystore 加密静默续期）
 ele.buct.one ─────────→ 宿舍电费网关（全校电费 / 东区双表 / 显式授权学号防滥用）
 tree.buct.edu.cn ─────→ 校园网网费与账单（余额 / 钱包 / 流量 / 缴费与月账单）
+notice.buct.one ──────→ 官方公告通道（只读 Markdown 图文公告 / 零个人凭据）
         │
    分域采集 → 版本化解析 → 原子落盘（失败不覆盖旧快照）→ 界面与小组件</pre>
       <ul class="privacy-points">
@@ -131,7 +138,7 @@ tree.buct.edu.cn ─────→ 校园网网费与账单（余额 / 钱包 /
   <section class="wrap section">
     <div class="glass-content cap-card spotlight-card contact" data-spotlight data-reveal>
       <h3>联系与反馈</h3>
-      <p class="lead">唯一反馈渠道为 GitHub Issues，不设邮箱以减小爬虫面。</p>
+      <p class="lead">欢迎通过 GitHub Issues 提交问题与建议，或加入 QQ 交流群（群号：<code>1053622526</code>）交流体验与蹲 iOS 版内测动态。</p>
       <a class="btn btn-secondary" href="https://github.com/STAR-10086/buct-one/issues" target="_blank" rel="noopener">提交 Issue</a>
     </div>
   </section>
